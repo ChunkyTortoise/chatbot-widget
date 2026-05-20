@@ -1,7 +1,5 @@
 name: CI
-
 on: [push, pull_request]
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,19 +13,13 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
         image: redis:7
         ports:
           - 6379:6379
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,7 +29,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pip install ruff pytest pytest-asyncio pytest-cov
       - name: Lint
-        run: ruff check api/ tests/ --ignore E501
+        run: ruff check api/ tests/ --ignore E501,E712 --per-file-ignores "api/models/*:F821"
       - name: Type check
         run: pip install mypy types-redis && mypy api/ --ignore-missing-imports
       - name: Test

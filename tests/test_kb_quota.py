@@ -1,7 +1,7 @@
 import pytest
 import uuid
 from unittest.mock import AsyncMock, MagicMock
-from api.billing.kb_quota import check_knowledge_base_quota, KB_LIMITS, KBQuotaResult
+from api.billing.kb_quota import check_knowledge_base_quota, KB_LIMITS
 
 
 @pytest.fixture

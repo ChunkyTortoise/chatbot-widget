@@ -223,7 +223,7 @@ class TestQuotaEnforcement:
         mock_redis.expire = AsyncMock()
 
         with patch("api.services.chat_service.similarity_search", return_value=[]):
-            response = await client.post(
+            await client.post(
                 f"/api/v1/chat/{chatbot_id}",
                 json={"message": "Hello", "session_id": "test-session"},
             )
