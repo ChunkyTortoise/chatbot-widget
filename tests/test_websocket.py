@@ -4,7 +4,7 @@ import uuid
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from starlette.testclient import TestClient
-from fastapi import FastAPI, WebSocket, Depends
+from fastapi import FastAPI
 from api.routes.chat import router
 from api.dependencies import get_db, get_redis
 

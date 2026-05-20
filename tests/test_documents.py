@@ -1,7 +1,7 @@
 import pytest
 import uuid
 from io import BytesIO
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 from datetime import datetime, timezone, timedelta
 from jose import jwt
 
