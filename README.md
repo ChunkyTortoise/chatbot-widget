@@ -4,7 +4,6 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16.2-000000)
 ![Claude](https://img.shields.io/badge/Claude-Sonnet-blueviolet)
 ![CI](https://github.com/ChunkyTortoise/chatbot-widget/actions/workflows/ci.yml/badge.svg)
-[![Dashboard](https://img.shields.io/badge/Dashboard-Live-brightgreen)](https://chatbot-widget-dashboard.vercel.app)
 
 # Chatbot Widget SaaS
 
@@ -203,10 +202,9 @@ The dashboard includes a [live playground](/dashboard/app/playground/page.tsx) f
 
 *Required for production. API runs without these in development mode.
 
-## Live Demo
+## Demo (Self-Host)
 
-- **Dashboard**: [chatbot-widget-dashboard.vercel.app](https://chatbot-widget-dashboard.vercel.app) — "Try Demo" button on the login page (no account needed)
-- **Widget demo page**: `GET /demo` — portfolio-quality showcase with live widget, copy-paste embed snippet, and cold-start indicator
+Screenshots below are from a local self-hosted run. See [Self-Hosting](#self-hosting) for full setup.
 
 ### Dashboard Login (with demo button)
 ![Dashboard Login](docs/screenshots/dashboard-login.png)
@@ -214,7 +212,7 @@ The dashboard includes a [live playground](/dashboard/app/playground/page.tsx) f
 ### Demo Page
 ![Demo Page](docs/screenshots/demo-page.png)
 
-Run locally:
+Run the widget demo locally:
 ```bash
 DEMO_MODE=true uvicorn api.main:app --reload
 # then open http://localhost:8000/demo
