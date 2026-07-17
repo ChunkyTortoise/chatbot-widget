@@ -183,5 +183,5 @@ Three tiers enforced via Redis-cached plan state:
 ## Links
 
 - **GitHub**: [ChunkyTortoise/chatbot-widget](https://github.com/ChunkyTortoise/chatbot-widget)
-- **Dashboard**: [chatbot-widget-dashboard.vercel.app](https://chatbot-widget-dashboard.vercel.app)
+- **Demo**: local only (`DEMO_MODE=true` + `GET /demo`); no public hosted dashboard currently
 - **License**: MIT
