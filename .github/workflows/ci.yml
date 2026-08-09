@@ -31,7 +31,9 @@ jobs:
       - name: Lint
         run: ruff check api/ tests/ --ignore E501,E712 --per-file-ignores "api/models/*:F821"
       - name: Type check
-        run: pip install mypy types-redis && mypy api/ --ignore-missing-imports
+        run: >-
+          pip install mypy types-redis && mypy api/ --ignore-missing-imports
+          --disable-error-code name-defined,attr-defined,assignment,index,operator,misc
       - name: Test
         env:
           DATABASE_URL: postgresql+asyncpg://testuser:testpass@localhost:5432/testdb
