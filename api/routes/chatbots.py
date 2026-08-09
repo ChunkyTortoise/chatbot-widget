@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from api.dependencies import get_db, get_admin_key, get_admin_or_owner
-from api.auth.middleware import get_optional_user, get_current_user, CurrentUser
+from api.auth.middleware import get_current_user, CurrentUser
 from api.models.chatbot import Chatbot
 from api.schemas.chatbot import (
     ChatbotCreate,

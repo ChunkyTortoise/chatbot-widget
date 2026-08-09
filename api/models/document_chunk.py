@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import uuid
-from sqlalchemy import String, Text, Integer, ForeignKey, Index
+from sqlalchemy import Text, Integer, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from pgvector.sqlalchemy import Vector

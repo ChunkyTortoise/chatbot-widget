@@ -6,7 +6,6 @@ from httpx import AsyncClient, ASGITransport
 from api.main import app
 from api.dependencies import get_db, get_redis
 from api.billing.quota import (
-    get_message_count,
     increment_message_count,
     check_quota,
     get_plan_limit,

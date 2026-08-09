@@ -3,7 +3,6 @@ import pytest
 
 @pytest.mark.asyncio
 async def test_health_endpoint(client, mock_db, mock_redis):
-    from sqlalchemy import text
     mock_db.execute = pytest.importorskip  # will be called
     mock_db.execute = __import__("unittest.mock", fromlist=["AsyncMock"]).AsyncMock()
 

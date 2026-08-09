@@ -1,6 +1,5 @@
 import pytest
-import uuid
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock
 from datetime import datetime, timezone, timedelta
 from jose import jwt
 from httpx import AsyncClient, ASGITransport

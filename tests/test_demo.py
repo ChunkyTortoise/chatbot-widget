@@ -2,7 +2,6 @@
 import pytest
 from pathlib import Path
 from httpx import AsyncClient
-from api.main import app
 
 
 class TestDemoUI:
@@ -104,7 +103,7 @@ class TestDemoChatbotResolution:
     ) -> None:
         """POST /chat/demo should work when DEMO_MODE=true."""
         response = await demo_client.post(
-            f"/api/v1/chat/demo",
+            "/api/v1/chat/demo",
             json={"message": "Hello", "session_id": "test-session"},
         )
         # Note: This may fail if no LLM API key is configured, but the routing should work
