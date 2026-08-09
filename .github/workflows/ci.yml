@@ -51,7 +51,10 @@ jobs:
         run: |
           pip install bandit pip-audit
           bandit -r api/ -q -ll
-          pip-audit --strict --desc
+          # PYSEC-2026-1325 is an unfixed timing advisory in the transitive
+          # ecdsa package. This app verifies JWTs and does not create ECDSA
+          # signatures or keys. Revisit when an upstream fix is published.
+          pip-audit --strict --desc --ignore-vuln PYSEC-2026-1325
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
