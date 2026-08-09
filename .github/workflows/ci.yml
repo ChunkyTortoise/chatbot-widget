@@ -27,7 +27,7 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
       - run: pip install -r requirements.txt
-      - run: pip install ruff pytest pytest-asyncio pytest-cov
+      - run: pip install ruff==0.9.10 pytest pytest-asyncio pytest-cov
       - name: Lint
         run: ruff check api/ tests/ --ignore E501,E712 --per-file-ignores "api/models/*:F821"
       - name: Type check
