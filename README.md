@@ -1,3 +1,5 @@
+> Historical learning project, not representative of current production work. Start here: [llm-reviewer-path](https://github.com/ChunkyTortoise/llm-reviewer-path) and [DocExtract](https://github.com/ChunkyTortoise/docextract).
+
 ![Tests](https://img.shields.io/badge/tests-161%20passing-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)
