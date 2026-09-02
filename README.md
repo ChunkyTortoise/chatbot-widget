@@ -1,15 +1,15 @@
 > Historical learning project, not representative of current production work. Start here: [llm-reviewer-path](https://github.com/ChunkyTortoise/llm-reviewer-path) and [DocExtract](https://github.com/ChunkyTortoise/docextract).
 
-![Tests](https://img.shields.io/badge/tests-161%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-143%20passing-brightgreen)
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688)
 ![Next.js](https://img.shields.io/badge/Next.js-16.2-000000)
 ![Claude](https://img.shields.io/badge/Claude-Sonnet-blueviolet)
 ![CI](https://github.com/ChunkyTortoise/chatbot-widget/actions/workflows/ci.yml/badge.svg)
 
 # Chatbot Widget SaaS
 
-Embeddable AI chatbot with full SaaS infrastructure - auth, billing, RAG knowledge base, analytics, and a Next.js 15 dashboard. Drop a single `<script>` tag on any website and get a streaming AI chat widget backed by Claude, pgvector retrieval, and Stripe subscriptions.
+Embeddable AI chatbot with full SaaS infrastructure - auth, billing, RAG knowledge base, analytics, and a Next.js 16 dashboard. Drop a single `<script>` tag on any website and get a streaming AI chat widget backed by Claude, pgvector retrieval, and Stripe subscriptions.
 
 ```html
 <script src="https://your-api.com/widget/chatbot.min.js"
@@ -51,7 +51,7 @@ The embeddable chat widget uses Shadow DOM for complete isolation:
 
 ### Widget Playground
 
-The dashboard includes a [live playground](/dashboard/app/playground/page.tsx) for configuring and previewing widgets before embedding:
+The dashboard includes a live playground page (real-time widget preview, color/title/system-prompt customization, and one-click copy of the ready-to-paste `<script>` embed snippet):
 - Real-time color customization with preset palette and custom hex picker
 - Editable widget title, welcome message, and system prompt
 - Live preview that updates instantly as you change settings
@@ -278,7 +278,7 @@ pytest tests/ -v
 # Dashboard TypeScript (13 tests)
 cd dashboard && npm test
 
-# Total: 161 tests
+# Total: 143 tests
 ```
 
 ## Widget Embed Options
