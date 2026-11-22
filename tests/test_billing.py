@@ -1,16 +1,17 @@
+from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timezone, timedelta
+from httpx import ASGITransport, AsyncClient
 from jose import jwt
-from httpx import AsyncClient, ASGITransport
-from api.main import app
-from api.dependencies import get_db, get_redis
+
 from api.billing.quota import (
-    increment_message_count,
     check_quota,
     get_plan_limit,
+    increment_message_count,
 )
-
+from api.dependencies import get_db, get_redis
+from api.main import app
 
 # ------------------------------------------------------------------
 # Helpers

@@ -1,0 +1,9 @@
+node_modules
+.next
+coverage
+package-lock.json
+next-env.d.ts
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx

@@ -1,6 +1,7 @@
 """Tests for DEMO_MODE functionality."""
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 
 
 @pytest.fixture
@@ -16,9 +17,10 @@ def _demo_mode_on():
 @pytest.fixture
 async def demo_client(mock_db, mock_redis, _demo_mode_on):
     """Test client with DEMO_MODE=true and mocked DB/Redis."""
-    from httpx import AsyncClient, ASGITransport
-    from api.main import app
+    from httpx import ASGITransport, AsyncClient
+
     from api.dependencies import get_db, get_redis
+    from api.main import app
 
     async def override_get_db():
         yield mock_db

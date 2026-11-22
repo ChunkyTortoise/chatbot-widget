@@ -1,5 +1,6 @@
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 
 
 class TestChunker:
@@ -89,7 +90,7 @@ class TestEmbedder:
         mock_client.aio.models.embed_content = AsyncMock(return_value=mock_result)
 
         with patch("api.services.embedder._get_client", return_value=mock_client):
-            from api.services.embedder import embed, MAX_CHARS
+            from api.services.embedder import MAX_CHARS, embed
             long_text = "x" * (MAX_CHARS + 1000)
             await embed(long_text)
 

@@ -1,8 +1,10 @@
 import httpx
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
+
 from api.config import settings
-from .middleware import get_current_user, CurrentUser
+
+from .middleware import CurrentUser, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -27,18 +29,29 @@ async def _supabase_auth(endpoint: str, payload: dict) -> dict:
             detail="Auth service not configured",
         )
     url = f"{settings.supabase_url}/auth/v1/{endpoint}"
-    headers = {"apikey": settings.supabase_service_role_key, "Content-Type": "application/json"}
+    headers = {
+        "apikey": settings.supabase_service_role_key,
+        "Content-Type": "application/json",
+    }
     async with httpx.AsyncClient() as client:
         resp = await client.post(url, json=payload, headers=headers)
     if resp.status_code >= 400:
-        detail = resp.json().get("error_description") or resp.json().get("msg") or "Auth error"
+        detail = (
+            resp.json().get("error_description")
+            or resp.json().get("msg")
+            or "Auth error"
+        )
         raise HTTPException(status_code=resp.status_code, detail=detail)
     return resp.json()
 
 
-@router.post("/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED
+)
 async def signup(body: AuthRequest):
-    data = await _supabase_auth("signup", {"email": body.email, "password": body.password})
+    data = await _supabase_auth(
+        "signup", {"email": body.email, "password": body.password}
+    )
     session = data.get("session") or {}
     user = data.get("user") or {}
     return AuthResponse(

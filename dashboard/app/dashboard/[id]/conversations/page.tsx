@@ -1,60 +1,73 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft, MessageCircle, ChevronDown, ChevronRight, User, Bot } from 'lucide-react'
-import { apiFetch } from '@/lib/api'
-import type { Conversation, ConversationMessage } from '@/lib/types'
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  MessageCircle,
+  ChevronDown,
+  ChevronRight,
+  User,
+  Bot,
+} from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import type { Conversation, ConversationMessage } from "@/lib/types";
 
 export default function ConversationsPage() {
-  const params = useParams()
-  const chatbotId = params.id as string
+  const params = useParams();
+  const chatbotId = params.id as string;
 
-  const [conversations, setConversations] = useState<Conversation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [messages, setMessages] = useState<Record<string, ConversationMessage[]>>({})
-  const [loadingMessages, setLoadingMessages] = useState<string | null>(null)
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<
+    Record<string, ConversationMessage[]>
+  >({});
+  const [loadingMessages, setLoadingMessages] = useState<string | null>(null);
 
   useEffect(() => {
     apiFetch<Conversation[]>(`/api/v1/chatbots/${chatbotId}/conversations`)
       .then(setConversations)
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load conversations'))
-      .finally(() => setLoading(false))
-  }, [chatbotId])
+      .catch((err) =>
+        setError(
+          err instanceof Error ? err.message : "Failed to load conversations",
+        ),
+      )
+      .finally(() => setLoading(false));
+  }, [chatbotId]);
 
   async function toggleConversation(convId: string) {
     if (expandedId === convId) {
-      setExpandedId(null)
-      return
+      setExpandedId(null);
+      return;
     }
 
-    setExpandedId(convId)
+    setExpandedId(convId);
 
-    if (messages[convId]) return
+    if (messages[convId]) return;
 
-    setLoadingMessages(convId)
+    setLoadingMessages(convId);
     try {
       const msgs = await apiFetch<ConversationMessage[]>(
-        `/api/v1/chatbots/${chatbotId}/conversations/${convId}/messages`
-      )
-      setMessages((prev) => ({ ...prev, [convId]: msgs }))
+        `/api/v1/chatbots/${chatbotId}/conversations/${convId}/messages`,
+      );
+      setMessages((prev) => ({ ...prev, [convId]: msgs }));
     } catch {
-      setMessages((prev) => ({ ...prev, [convId]: [] }))
+      setMessages((prev) => ({ ...prev, [convId]: [] }));
     } finally {
-      setLoadingMessages(null)
+      setLoadingMessages(null);
     }
   }
 
   function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
+    return new Date(iso).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   if (loading) {
@@ -62,7 +75,7 @@ export default function ConversationsPage() {
       <div className="mx-auto max-w-3xl px-4 py-12">
         <p className="text-muted-foreground">Loading conversations...</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -82,7 +95,9 @@ export default function ConversationsPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
       )}
 
       {conversations.length === 0 ? (
@@ -95,7 +110,10 @@ export default function ConversationsPage() {
       ) : (
         <div className="space-y-2">
           {conversations.map((conv) => (
-            <div key={conv.id} className="rounded-lg border border-border bg-card overflow-hidden">
+            <div
+              key={conv.id}
+              className="rounded-lg border border-border bg-card overflow-hidden"
+            >
               <button
                 onClick={() => toggleConversation(conv.id)}
                 className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
@@ -123,15 +141,19 @@ export default function ConversationsPage() {
               {expandedId === conv.id && (
                 <div className="border-t border-border px-4 py-3 bg-muted/30">
                   {loadingMessages === conv.id ? (
-                    <p className="text-sm text-muted-foreground py-2">Loading messages...</p>
+                    <p className="text-sm text-muted-foreground py-2">
+                      Loading messages...
+                    </p>
                   ) : (messages[conv.id] || []).length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-2">No messages found.</p>
+                    <p className="text-sm text-muted-foreground py-2">
+                      No messages found.
+                    </p>
                   ) : (
                     <div className="space-y-3">
                       {(messages[conv.id] || []).map((msg) => (
                         <div key={msg.id} className="flex gap-2">
                           <div className="flex-shrink-0 mt-0.5">
-                            {msg.role === 'user' ? (
+                            {msg.role === "user" ? (
                               <User className="h-4 w-4 text-blue-500" />
                             ) : (
                               <Bot className="h-4 w-4 text-green-500" />
@@ -161,5 +183,5 @@ export default function ConversationsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

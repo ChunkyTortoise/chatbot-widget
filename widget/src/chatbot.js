@@ -1,33 +1,35 @@
-(function() {
-  'use strict';
+(function () {
+  "use strict";
 
   // Read config from script tag data attributes
-  const script = document.currentScript || document.querySelector('script[data-chatbot-id]');
-  const CHATBOT_ID = script.getAttribute('data-chatbot-id');
-  const API_KEY = script.getAttribute('data-api-key') || '';
-  const POSITION = script.getAttribute('data-position') || 'bottom-right';
-  const PRIMARY_COLOR = script.getAttribute('data-primary-color') || '#3B82F6';
-  const TITLE = script.getAttribute('data-title') || 'Chat with us';
+  const script =
+    document.currentScript || document.querySelector("script[data-chatbot-id]");
+  const CHATBOT_ID = script.getAttribute("data-chatbot-id");
+  const API_KEY = script.getAttribute("data-api-key") || "";
+  const POSITION = script.getAttribute("data-position") || "bottom-right";
+  const PRIMARY_COLOR = script.getAttribute("data-primary-color") || "#3B82F6";
+  const TITLE = script.getAttribute("data-title") || "Chat with us";
 
   // Auto-detect API host from script src
   const API_HOST = (() => {
-    const src = script.src || '';
+    const src = script.src || "";
     try {
       const url = new URL(src);
       return url.origin;
     } catch {
-      return 'http://localhost:8000';
+      return "http://localhost:8000";
     }
   })();
 
-  const WS_HOST = API_HOST.replace(/^http/, 'ws');
+  const WS_HOST = API_HOST.replace(/^http/, "ws");
 
   // Session persistence
   const SESSION_ID = (() => {
     const key = `chatbot_session_${CHATBOT_ID}`;
     let id = sessionStorage.getItem(key);
     if (!id) {
-      id = 'sess_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      id =
+        "sess_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
       sessionStorage.setItem(key, id);
     }
     return id;
@@ -38,7 +40,7 @@
   let reconnectDelay = 1000;
   let isOpen = false;
   let currentBotMessage = null;
-  let currentBotText = '';
+  let currentBotText = "";
   let welcomeShown = false;
   let heartbeatInterval = null;
 
@@ -53,7 +55,7 @@
 
     .bubble {
       position: fixed;
-      ${POSITION === 'bottom-left' ? 'left: 24px;' : 'right: 24px;'}
+      ${POSITION === "bottom-left" ? "left: 24px;" : "right: 24px;"}
       bottom: 24px;
       width: 56px;
       height: 56px;
@@ -77,7 +79,7 @@
 
     .window {
       position: fixed;
-      ${POSITION === 'bottom-left' ? 'left: 24px;' : 'right: 24px;'}
+      ${POSITION === "bottom-left" ? "left: 24px;" : "right: 24px;"}
       bottom: 96px;
       width: 360px;
       height: 520px;
@@ -260,14 +262,14 @@
    */
   function parseMarkdown(text) {
     var frag = document.createDocumentFragment();
-    var lines = text.split('\n');
+    var lines = text.split("\n");
     var listItems = [];
 
     function flushList() {
       if (listItems.length === 0) return;
-      var ul = document.createElement('ul');
+      var ul = document.createElement("ul");
       for (var i = 0; i < listItems.length; i++) {
-        var li = document.createElement('li');
+        var li = document.createElement("li");
         appendInline(li, listItems[i]);
         ul.appendChild(li);
       }
@@ -277,29 +279,32 @@
 
     function appendInline(parent, str) {
       // Pattern matches: **bold**, *italic*, `code`, [text](url)
-      var re = /(\*\*(.+?)\*\*|\*(.+?)\*|`([^`]+)`|\[([^\]]+)\]\((https?:\/\/[^)]+)\))/g;
+      var re =
+        /(\*\*(.+?)\*\*|\*(.+?)\*|`([^`]+)`|\[([^\]]+)\]\((https?:\/\/[^)]+)\))/g;
       var last = 0;
       var match;
       while ((match = re.exec(str)) !== null) {
         if (match.index > last) {
-          parent.appendChild(document.createTextNode(str.slice(last, match.index)));
+          parent.appendChild(
+            document.createTextNode(str.slice(last, match.index)),
+          );
         }
         var el;
         if (match[2] !== undefined) {
-          el = document.createElement('strong');
+          el = document.createElement("strong");
           el.textContent = match[2];
         } else if (match[3] !== undefined) {
-          el = document.createElement('em');
+          el = document.createElement("em");
           el.textContent = match[3];
         } else if (match[4] !== undefined) {
-          el = document.createElement('code');
+          el = document.createElement("code");
           el.textContent = match[4];
         } else if (match[5] !== undefined && match[6] !== undefined) {
-          el = document.createElement('a');
+          el = document.createElement("a");
           el.textContent = match[5];
           el.href = match[6];
-          el.target = '_blank';
-          el.rel = 'noopener noreferrer';
+          el.target = "_blank";
+          el.rel = "noopener noreferrer";
         }
         parent.appendChild(el);
         last = re.lastIndex;
@@ -311,13 +316,13 @@
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
-      var listMatch = line.match(/^[\-\*] (.+)/);
+      var listMatch = line.match(/^[-*] (.+)/);
       if (listMatch) {
         listItems.push(listMatch[1]);
       } else {
         flushList();
         if (i > 0) {
-          frag.appendChild(document.createElement('br'));
+          frag.appendChild(document.createElement("br"));
         }
         appendInline(frag, line);
       }
@@ -327,54 +332,72 @@
   }
 
   // SVG icons
-  var CHAT_ICON = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
-  var CLOSE_ICON = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-  var SEND_ICON = '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>';
+  var CHAT_ICON =
+    '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+  var CLOSE_ICON =
+    '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+  var SEND_ICON =
+    '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>';
 
   function createWidget() {
-    var host = document.createElement('div');
-    host.id = 'chatbot-widget-root';
-    var shadow = host.attachShadow({ mode: 'open' });
+    var host = document.createElement("div");
+    host.id = "chatbot-widget-root";
+    var shadow = host.attachShadow({ mode: "open" });
 
-    shadow.innerHTML = '<style>' + STYLES + '</style>' +
-      '<button class="bubble" id="bubble" aria-label="Open chat" title="' + TITLE + '">' +
-        CHAT_ICON +
-      '</button>' +
+    shadow.innerHTML =
+      "<style>" +
+      STYLES +
+      "</style>" +
+      '<button class="bubble" id="bubble" aria-label="Open chat" title="' +
+      TITLE +
+      '">' +
+      CHAT_ICON +
+      "</button>" +
       '<div class="window" id="window" role="dialog" aria-label="Chat window" aria-hidden="true">' +
-        '<div class="header">' +
-          '<div>' +
-            '<div class="header-title">' + TITLE + '</div>' +
-            '<div class="header-subtitle" id="status-text">Connecting...</div>' +
-          '</div>' +
-          '<button class="close-btn" id="close-btn" aria-label="Close chat">' + CLOSE_ICON + '</button>' +
-        '</div>' +
-        '<div class="messages" id="messages" role="log" aria-live="polite"></div>' +
-        '<div class="input-area">' +
-          '<textarea class="input" id="input" placeholder="Type a message..." rows="1" aria-label="Type your message"></textarea>' +
-          '<button class="send-btn" id="send-btn" aria-label="Send message" disabled>' + SEND_ICON + '</button>' +
-        '</div>' +
-        '<div class="powered-by">Powered by AI</div>' +
-      '</div>';
+      '<div class="header">' +
+      "<div>" +
+      '<div class="header-title">' +
+      TITLE +
+      "</div>" +
+      '<div class="header-subtitle" id="status-text">Connecting...</div>' +
+      "</div>" +
+      '<button class="close-btn" id="close-btn" aria-label="Close chat">' +
+      CLOSE_ICON +
+      "</button>" +
+      "</div>" +
+      '<div class="messages" id="messages" role="log" aria-live="polite"></div>' +
+      '<div class="input-area">' +
+      '<textarea class="input" id="input" placeholder="Type a message..." rows="1" aria-label="Type your message"></textarea>' +
+      '<button class="send-btn" id="send-btn" aria-label="Send message" disabled>' +
+      SEND_ICON +
+      "</button>" +
+      "</div>" +
+      '<div class="powered-by">Powered by AI</div>' +
+      "</div>";
 
     document.body.appendChild(host);
 
-    var bubble = shadow.getElementById('bubble');
-    var win = shadow.getElementById('window');
-    var closeBtn = shadow.getElementById('close-btn');
-    var input = shadow.getElementById('input');
-    var sendBtn = shadow.getElementById('send-btn');
-    var messages = shadow.getElementById('messages');
-    var statusText = shadow.getElementById('status-text');
+    var bubble = shadow.getElementById("bubble");
+    var win = shadow.getElementById("window");
+    var closeBtn = shadow.getElementById("close-btn");
+    var input = shadow.getElementById("input");
+    var sendBtn = shadow.getElementById("send-btn");
+    var messages = shadow.getElementById("messages");
+    var statusText = shadow.getElementById("status-text");
 
     // Open/close
-    bubble.addEventListener('click', function() { toggleWindow(true); });
-    closeBtn.addEventListener('click', function() { toggleWindow(false); });
+    bubble.addEventListener("click", function () {
+      toggleWindow(true);
+    });
+    closeBtn.addEventListener("click", function () {
+      toggleWindow(false);
+    });
 
     function toggleWindow(open) {
       isOpen = open;
-      win.classList.toggle('open', open);
-      win.setAttribute('aria-hidden', String(!open));
-      bubble.setAttribute('aria-expanded', String(open));
+      win.classList.toggle("open", open);
+      win.setAttribute("aria-hidden", String(!open));
+      bubble.setAttribute("aria-expanded", String(open));
 
       if (open) {
         input.focus();
@@ -388,30 +411,30 @@
     }
 
     // Close on Escape
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen) toggleWindow(false);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && isOpen) toggleWindow(false);
     });
 
     // Input auto-resize + Enter to send
-    input.addEventListener('input', function() {
-      input.style.height = 'auto';
-      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    input.addEventListener("input", function () {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 120) + "px";
       sendBtn.disabled = !input.value.trim();
     });
 
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
     });
 
-    sendBtn.addEventListener('click', sendMessage);
+    sendBtn.addEventListener("click", sendMessage);
 
     function addMessage(role, content) {
-      var el = document.createElement('div');
-      el.className = 'msg ' + role;
-      if (role === 'bot' && content) {
+      var el = document.createElement("div");
+      el.className = "msg " + role;
+      if (role === "bot" && content) {
         el.appendChild(parseMarkdown(content));
       } else {
         el.textContent = content;
@@ -422,34 +445,35 @@
     }
 
     function showTyping() {
-      var el = document.createElement('div');
-      el.className = 'msg bot typing-indicator';
-      el.id = 'typing';
-      el.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+      var el = document.createElement("div");
+      el.className = "msg bot typing-indicator";
+      el.id = "typing";
+      el.innerHTML =
+        '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
       messages.appendChild(el);
       messages.scrollTop = messages.scrollHeight;
       return el;
     }
 
     function removeTyping() {
-      var el = shadow.getElementById('typing');
+      var el = shadow.getElementById("typing");
       if (el) el.remove();
     }
 
     function showWelcome() {
       welcomeShown = true;
-      fetch(API_HOST + '/api/v1/chatbots/' + CHATBOT_ID + '/widget-config')
-        .then(function(res) {
+      fetch(API_HOST + "/api/v1/chatbots/" + CHATBOT_ID + "/widget-config")
+        .then(function (res) {
           if (res.ok) return res.json();
-          throw new Error('Config fetch failed');
+          throw new Error("Config fetch failed");
         })
-        .then(function(config) {
+        .then(function (config) {
           if (config.welcome_message) {
-            addMessage('bot', config.welcome_message);
+            addMessage("bot", config.welcome_message);
           }
         })
-        .catch(function() {
-          addMessage('bot', 'Hi! How can I help you today?');
+        .catch(function () {
+          addMessage("bot", "Hi! How can I help you today?");
         });
     }
 
@@ -457,14 +481,14 @@
       var text = input.value.trim();
       if (!text) return;
       if (!ws || ws.readyState !== WebSocket.OPEN) {
-        addMessage('bot', 'Connecting... please try again in a moment.');
+        addMessage("bot", "Connecting... please try again in a moment.");
         connectWS();
         return;
       }
 
-      addMessage('user', text);
-      input.value = '';
-      input.style.height = 'auto';
+      addMessage("user", text);
+      input.value = "";
+      input.style.height = "auto";
       sendBtn.disabled = true;
       input.disabled = true;
 
@@ -473,70 +497,75 @@
     }
 
     function connectWS() {
-      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+      if (
+        ws &&
+        (ws.readyState === WebSocket.OPEN ||
+          ws.readyState === WebSocket.CONNECTING)
+      )
+        return;
 
       var params = new URLSearchParams({ session_id: SESSION_ID });
-      if (API_KEY) params.append('api_key', API_KEY);
+      if (API_KEY) params.append("api_key", API_KEY);
 
-      var url = WS_HOST + '/ws/chat/' + CHATBOT_ID + '?' + params;
+      var url = WS_HOST + "/ws/chat/" + CHATBOT_ID + "?" + params;
       ws = new WebSocket(url);
 
-      statusText.textContent = 'Connecting...';
+      statusText.textContent = "Connecting...";
       sendBtn.disabled = true;
 
-      ws.onopen = function() {
-        statusText.textContent = 'Online';
+      ws.onopen = function () {
+        statusText.textContent = "Online";
         sendBtn.disabled = false;
         input.disabled = false;
         reconnectDelay = 1000;
 
         // Start heartbeat
         if (heartbeatInterval) clearInterval(heartbeatInterval);
-        heartbeatInterval = setInterval(function() {
+        heartbeatInterval = setInterval(function () {
           if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('ping');
+            ws.send("ping");
           }
         }, 25000);
       };
 
-      ws.onmessage = function(event) {
+      ws.onmessage = function (event) {
         try {
           var data = JSON.parse(event.data);
 
-          if (data.type === 'start') {
+          if (data.type === "start") {
             removeTyping();
-            currentBotText = '';
-            currentBotMessage = addMessage('bot', '');
-          } else if (data.type === 'token' && currentBotMessage) {
+            currentBotText = "";
+            currentBotMessage = addMessage("bot", "");
+          } else if (data.type === "token" && currentBotMessage) {
             currentBotText += data.content;
-            currentBotMessage.innerHTML = '';
+            currentBotMessage.innerHTML = "";
             currentBotMessage.appendChild(parseMarkdown(currentBotText));
             messages.scrollTop = messages.scrollHeight;
-          } else if (data.type === 'end') {
+          } else if (data.type === "end") {
             currentBotMessage = null;
-            currentBotText = '';
+            currentBotText = "";
             sendBtn.disabled = false;
             input.disabled = false;
             input.focus();
-          } else if (data.type === 'error') {
+          } else if (data.type === "error") {
             removeTyping();
-            addMessage('bot', 'Sorry, something went wrong. Please try again.');
+            addMessage("bot", "Sorry, something went wrong. Please try again.");
             sendBtn.disabled = false;
             input.disabled = false;
             currentBotMessage = null;
           }
           // pong: heartbeat ok, no action needed
-        } catch (e) {
+        } catch {
           // non-JSON message, ignore
         }
       };
 
-      ws.onerror = function() {
-        statusText.textContent = 'Connection error';
+      ws.onerror = function () {
+        statusText.textContent = "Connection error";
       };
 
-      ws.onclose = function() {
-        statusText.textContent = 'Offline';
+      ws.onclose = function () {
+        statusText.textContent = "Offline";
         sendBtn.disabled = true;
         ws = null;
 
@@ -548,7 +577,9 @@
 
         // Exponential backoff reconnect
         if (isOpen) {
-          setTimeout(function() { connectWS(); }, reconnectDelay);
+          setTimeout(function () {
+            connectWS();
+          }, reconnectDelay);
           reconnectDelay = Math.min(reconnectDelay * 2, 30000);
         }
       };
@@ -558,8 +589,8 @@
   }
 
   // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', createWidget);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", createWidget);
   } else {
     createWidget();
   }

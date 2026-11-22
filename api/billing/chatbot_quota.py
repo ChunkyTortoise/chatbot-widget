@@ -1,8 +1,9 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from fastapi import HTTPException
-from api.models.chatbot import Chatbot
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.config import settings
+from api.models.chatbot import Chatbot
 
 CHATBOT_LIMITS = {
     "free": 1,
@@ -11,7 +12,9 @@ CHATBOT_LIMITS = {
 }
 
 
-async def check_chatbot_quota(owner_email: str, plan_tier: str, db: AsyncSession) -> None:
+async def check_chatbot_quota(
+    owner_email: str, plan_tier: str, db: AsyncSession
+) -> None:
     """Raise HTTP 403 if user has hit their plan's chatbot limit."""
     if settings.demo_mode:
         return  # skip quota in demo mode

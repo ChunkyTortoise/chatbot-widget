@@ -1,13 +1,15 @@
-from contextlib import asynccontextmanager
 import logging
 import uuid
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
+
 from api.config import settings
-from api.models.database import engine
 from api.models.base import Base
+from api.models.database import engine
 from api.routes import api_router
 
 logger = logging.getLogger(__name__)
@@ -22,6 +24,7 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     if settings.demo_mode:
         from api.seed import seed_demo_data
+
         logger.info("DEMO_MODE enabled — seeding demo data...")
         await seed_demo_data()
     logger.info("Ready.")

@@ -1,13 +1,15 @@
 from fastapi import APIRouter
-from .health import router as health_router
-from .chatbots import router as chatbots_router
-from .documents import router as documents_router
-from .chat import router as chat_router
-from .widget import router as widget_router
-from .analytics import router as analytics_router
-from .demo import router as demo_router
+
 from api.auth import auth_router
 from api.billing.routes import router as billing_router
+
+from .analytics import router as analytics_router
+from .chat import router as chat_router
+from .chatbots import router as chatbots_router
+from .demo import router as demo_router
+from .documents import router as documents_router
+from .health import router as health_router
+from .widget import router as widget_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, tags=["health"])

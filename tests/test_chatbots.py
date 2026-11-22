@@ -1,7 +1,8 @@
-import pytest
 import uuid
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
-from datetime import datetime, timezone, timedelta
+
+import pytest
 from jose import jwt
 
 JWT_SECRET = "dev-jwt-secret"

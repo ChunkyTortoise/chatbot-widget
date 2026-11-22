@@ -1,13 +1,15 @@
-import uuid
 import logging
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, text
+
+from api.auth.middleware import CurrentUser, get_current_user
 from api.dependencies import get_db
-from api.auth.middleware import get_current_user, CurrentUser
 from api.models.chatbot import Chatbot
 from api.models.conversation import Conversation
 from api.models.message import Message
@@ -16,7 +18,9 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-async def _assert_owner(chatbot_id: uuid.UUID, user: CurrentUser, db: AsyncSession) -> Chatbot:
+async def _assert_owner(
+    chatbot_id: uuid.UUID, user: CurrentUser, db: AsyncSession
+) -> Chatbot:
     result = await db.execute(
         select(Chatbot).where(
             Chatbot.id == chatbot_id,
@@ -41,22 +45,29 @@ async def get_analytics(
 
     # Total conversations
     conv_result = await db.execute(
-        select(func.count()).select_from(Conversation).where(Conversation.chatbot_id == chatbot_id)
+        select(func.count())
+        .select_from(Conversation)
+        .where(Conversation.chatbot_id == chatbot_id)
     )
     total_conversations = conv_result.scalar_one() or 0
 
     # Total messages (user messages only for meaningful count)
     msg_result = await db.execute(
-        select(func.count()).select_from(Message).join(
-            Conversation, Message.conversation_id == Conversation.id
-        ).where(
+        select(func.count())
+        .select_from(Message)
+        .join(Conversation, Message.conversation_id == Conversation.id)
+        .where(
             Conversation.chatbot_id == chatbot_id,
             Message.role == "user",
         )
     )
     total_messages = msg_result.scalar_one() or 0
 
-    avg_messages = round(total_messages / total_conversations, 1) if total_conversations > 0 else 0.0
+    avg_messages = (
+        round(total_messages / total_conversations, 1)
+        if total_conversations > 0
+        else 0.0
+    )
 
     return {
         "chatbot_id": str(chatbot_id),
@@ -162,7 +173,9 @@ async def get_timeseries(
     await _assert_owner(chatbot_id, user, db)
 
     now = datetime.now(timezone.utc)
-    start_date = (now - timedelta(days=days - 1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    start_date = (now - timedelta(days=days - 1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
 
     # Query: count messages per day
     result = await db.execute(
@@ -196,6 +209,8 @@ async def get_timeseries(
     for i in range(days):
         d = start_date + timedelta(days=i)
         date_str = d.strftime("%Y-%m-%d")
-        data.append(TimeseriesPoint(date=date_str, message_count=counts.get(date_str, 0)))
+        data.append(
+            TimeseriesPoint(date=date_str, message_count=counts.get(date_str, 0))
+        )
 
     return TimeseriesResponse(chatbot_id=str(chatbot_id), days=days, data=data)

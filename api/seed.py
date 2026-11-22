@@ -1,12 +1,15 @@
 """Seed demo data when DEMO_MODE is enabled."""
+
+import hashlib
 import logging
 import uuid
-import hashlib
 from datetime import datetime, timezone
+
 from sqlalchemy import select
-from api.models.database import AsyncSessionLocal
+
 from api.models.chatbot import Chatbot
 from api.models.conversation import Conversation
+from api.models.database import AsyncSessionLocal
 from api.models.message import Message
 
 logger = logging.getLogger(__name__)
@@ -14,7 +17,9 @@ logger = logging.getLogger(__name__)
 DEMO_CHATBOT_NAME = "Demo Assistant"
 DEMO_OWNER_EMAIL = "demo@example.com"
 DEMO_API_KEY = "cbk_demo_key_for_testing"
-DEMO_SYSTEM_PROMPT = "You are a helpful assistant. Answer questions concisely and helpfully."
+DEMO_SYSTEM_PROMPT = (
+    "You are a helpful assistant. Answer questions concisely and helpfully."
+)
 
 
 async def seed_demo_data() -> None:
@@ -28,7 +33,9 @@ async def seed_demo_data() -> None:
         )
         existing = result.scalar_one_or_none()
         if existing:
-            logger.info("Demo chatbot already exists (id=%s), skipping seed.", existing.id)
+            logger.info(
+                "Demo chatbot already exists (id=%s), skipping seed.", existing.id
+            )
             return
 
         chatbot_id = uuid.uuid4()
@@ -58,20 +65,26 @@ async def seed_demo_data() -> None:
         )
         session.add(convo)
 
-        session.add(Message(
-            id=uuid.uuid4(),
-            conversation_id=convo_id,
-            role="user",
-            content="What can you help me with?",
-            created_at=datetime.now(timezone.utc),
-        ))
-        session.add(Message(
-            id=uuid.uuid4(),
-            conversation_id=convo_id,
-            role="assistant",
-            content="I can answer questions, help with research, and assist with various tasks. How can I help you today?",
-            created_at=datetime.now(timezone.utc),
-        ))
+        session.add(
+            Message(
+                id=uuid.uuid4(),
+                conversation_id=convo_id,
+                role="user",
+                content="What can you help me with?",
+                created_at=datetime.now(timezone.utc),
+            )
+        )
+        session.add(
+            Message(
+                id=uuid.uuid4(),
+                conversation_id=convo_id,
+                role="assistant",
+                content="I can answer questions, help with research, and assist with various tasks. How can I help you today?",
+                created_at=datetime.now(timezone.utc),
+            )
+        )
 
         await session.commit()
-        logger.info("Demo data seeded: chatbot=%s, conversation=%s", chatbot_id, convo_id)
+        logger.info(
+            "Demo data seeded: chatbot=%s, conversation=%s", chatbot_id, convo_id
+        )

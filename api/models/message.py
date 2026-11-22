@@ -1,16 +1,23 @@
 from __future__ import annotations
 
 import uuid
-from sqlalchemy import String, Text, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from .base import Base, UUIDMixin, TimestampMixin
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base, TimestampMixin, UUIDMixin
 
 
 class Message(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "messages"
 
-    conversation_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True)
+    conversation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("conversations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     role: Mapped[str] = mapped_column(String(20), nullable=False)  # user/assistant
     content: Mapped[str] = mapped_column(Text, nullable=False)
 

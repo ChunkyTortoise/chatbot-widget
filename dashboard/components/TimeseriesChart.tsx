@@ -1,46 +1,58 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { apiFetch } from '@/lib/api'
+import { useEffect, useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { apiFetch } from "@/lib/api";
 
 interface TimeseriesPoint {
-  date: string
-  message_count: number
+  date: string;
+  message_count: number;
 }
 
 interface TimeseriesData {
-  chatbot_id: string
-  days: number
-  data: TimeseriesPoint[]
+  chatbot_id: string;
+  days: number;
+  data: TimeseriesPoint[];
 }
 
 interface TimeseriesChartProps {
-  chatbotId: string
+  chatbotId: string;
 }
 
 export function TimeseriesChart({ chatbotId }: TimeseriesChartProps) {
-  const [data, setData] = useState<TimeseriesPoint[] | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [data, setData] = useState<TimeseriesPoint[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    apiFetch<TimeseriesData>(`/api/v1/chatbots/${chatbotId}/analytics/timeseries?days=30`)
+    apiFetch<TimeseriesData>(
+      `/api/v1/chatbots/${chatbotId}/analytics/timeseries?days=30`,
+    )
       .then((res) => setData(res.data))
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load chart'))
-      .finally(() => setLoading(false))
-  }, [chatbotId])
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Failed to load chart"),
+      )
+      .finally(() => setLoading(false));
+  }, [chatbotId]);
 
   if (loading) {
     return (
       <div className="rounded-lg border border-border bg-card p-6">
         <div className="h-[250px] animate-pulse rounded bg-muted" />
       </div>
-    )
+    );
   }
 
   if (error || !data) {
-    return null
+    return null;
   }
 
   return (
@@ -59,7 +71,7 @@ export function TimeseriesChart({ chatbotId }: TimeseriesChartProps) {
           <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
           <Tooltip
             labelFormatter={(label) => `Date: ${label}`}
-            formatter={(value) => [value, 'Messages']}
+            formatter={(value) => [value, "Messages"]}
           />
           <Area
             type="monotone"
@@ -72,5 +84,5 @@ export function TimeseriesChart({ chatbotId }: TimeseriesChartProps) {
         </AreaChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }

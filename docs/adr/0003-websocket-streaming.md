@@ -1,7 +1,7 @@
 # ADR 0003: WebSocket over SSE for Chat Streaming
 
-**Status:** Accepted  
-**Date:** 2025-12-15  
+**Status:** Accepted
+**Date:** 2025-12-15
 **Decision Makers:** Cayman Roden
 
 ## Context

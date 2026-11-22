@@ -1,26 +1,27 @@
-import uuid
-import secrets
 import hashlib
 import logging
+import secrets
+import uuid
+from datetime import datetime, timezone
 from typing import Optional
+
+import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
-from api.dependencies import get_db, get_admin_key, get_admin_or_owner
-from api.auth.middleware import get_current_user, CurrentUser
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.auth.middleware import CurrentUser, get_current_user
+from api.billing.chatbot_quota import check_chatbot_quota
+from api.billing.quota import get_user_plan
+from api.dependencies import get_admin_key, get_admin_or_owner, get_db, get_redis
 from api.models.chatbot import Chatbot
 from api.schemas.chatbot import (
     ChatbotCreate,
-    ChatbotUpdate,
     ChatbotResponse,
+    ChatbotUpdate,
     CreateChatbotResponse,
     WidgetConfig,
 )
-from datetime import datetime, timezone
-from api.billing.chatbot_quota import check_chatbot_quota
-from api.billing.quota import get_user_plan
-from api.dependencies import get_redis
-import redis.asyncio as aioredis
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -46,7 +47,9 @@ async def list_chatbots(
     return result.scalars().all()
 
 
-def _make_chatbot(payload: ChatbotCreate, owner_email: Optional[str] = None) -> tuple[Chatbot, str]:
+def _make_chatbot(
+    payload: ChatbotCreate, owner_email: Optional[str] = None
+) -> tuple[Chatbot, str]:
     raw_key = f"cbk_{secrets.token_urlsafe(32)}"
     chatbot = Chatbot(
         id=uuid.uuid4(),
@@ -92,7 +95,11 @@ async def create_chatbot(
     return _chatbot_to_response(chatbot, raw_key)
 
 
-@router.post("/chatbots/me", response_model=CreateChatbotResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/chatbots/me",
+    response_model=CreateChatbotResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_my_chatbot(
     payload: ChatbotCreate,
     db: AsyncSession = Depends(get_db),

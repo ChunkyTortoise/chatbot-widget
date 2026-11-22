@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import uuid
-from sqlalchemy import String, Text, Boolean, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from sqlalchemy import Boolean, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from .base import Base, UUIDMixin, TimestampMixin
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base, TimestampMixin, UUIDMixin
 
 
 class Chatbot(Base, UUIDMixin, TimestampMixin):
@@ -21,10 +23,17 @@ class Chatbot(Base, UUIDMixin, TimestampMixin):
     api_key_hash: Mapped[str] = mapped_column(String(200), nullable=False)
     owner_email: Mapped[str | None] = mapped_column(String(200))
     owner_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     owner: Mapped["User | None"] = relationship(back_populates="chatbots")  # type: ignore[name-defined]
-    knowledge_docs: Mapped[list["KnowledgeDoc"]] = relationship(back_populates="chatbot", cascade="all, delete-orphan")
-    conversations: Mapped[list["Conversation"]] = relationship(back_populates="chatbot", cascade="all, delete-orphan")
+    knowledge_docs: Mapped[list["KnowledgeDoc"]] = relationship(
+        back_populates="chatbot", cascade="all, delete-orphan"
+    )
+    conversations: Mapped[list["Conversation"]] = relationship(
+        back_populates="chatbot", cascade="all, delete-orphan"
+    )

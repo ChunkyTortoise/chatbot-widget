@@ -1,7 +1,7 @@
 # ADR 0002: pgvector over Pinecone for Vector Storage
 
-**Status:** Accepted  
-**Date:** 2025-12-15  
+**Status:** Accepted
+**Date:** 2025-12-15
 **Decision Makers:** Cayman Roden
 
 ## Context

@@ -1,17 +1,19 @@
-import uuid
 import logging
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+import uuid
+
 import redis.asyncio as aioredis
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.billing.quota import check_quota, get_user_plan, increment_message_count
+from api.config import settings
 from api.dependencies import get_db, get_redis, verify_api_key_hash
 from api.models.chatbot import Chatbot
 from api.schemas.chat import ChatRequest, ChatResponse
-from api.services.chat_service import stream_response, get_or_create_conversation
-from api.billing.quota import check_quota, increment_message_count, get_user_plan
-from api.config import settings
 from api.seed import DEMO_CHATBOT_NAME, DEMO_OWNER_EMAIL
+from api.services.chat_service import get_or_create_conversation, stream_response
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -65,7 +67,9 @@ async def chat_rest(
 ):
     """Non-streaming REST chat endpoint."""
     resolved_id = await _resolve_chatbot_id(chatbot_id, db)
-    result = await db.execute(select(Chatbot).where(Chatbot.id == resolved_id, Chatbot.is_active == True))
+    result = await db.execute(
+        select(Chatbot).where(Chatbot.id == resolved_id, Chatbot.is_active == True)
+    )
     chatbot = result.scalar_one_or_none()
     if not chatbot:
         raise HTTPException(status_code=404, detail="Chatbot not found")
@@ -88,10 +92,14 @@ async def chat_rest(
         plan_tier = await get_user_plan(redis_client, owner_email)
         allowed = await check_quota(redis_client, owner_email, plan_tier)
         if not allowed:
-            raise HTTPException(status_code=429, detail="Monthly message quota exceeded")
+            raise HTTPException(
+                status_code=429, detail="Monthly message quota exceeded"
+            )
 
     full_response = ""
-    async for token in stream_response(resolved_id, request.session_id, request.message, db):
+    async for token in stream_response(
+        resolved_id, request.session_id, request.message, db
+    ):
         full_response += token
 
     # Increment quota counter after successful response
@@ -123,7 +131,9 @@ async def chat_websocket(
         await websocket.close(code=4004)
         return
 
-    result = await db.execute(select(Chatbot).where(Chatbot.id == resolved_id, Chatbot.is_active == True))
+    result = await db.execute(
+        select(Chatbot).where(Chatbot.id == resolved_id, Chatbot.is_active == True)
+    )
     chatbot = result.scalar_one_or_none()
 
     if not chatbot:
@@ -150,10 +160,12 @@ async def chat_websocket(
             # Per-session rate limit
             retry_after = await _check_rate_limit(redis_client, session_id)
             if retry_after is not None:
-                await websocket.send_json({
-                    "type": "error",
-                    "content": "Rate limit exceeded",
-                })
+                await websocket.send_json(
+                    {
+                        "type": "error",
+                        "content": "Rate limit exceeded",
+                    }
+                )
                 await websocket.close(code=4029)
                 return
 
@@ -162,14 +174,18 @@ async def chat_websocket(
                 plan_tier = await get_user_plan(redis_client, owner_email)
                 allowed = await check_quota(redis_client, owner_email, plan_tier)
                 if not allowed:
-                    await websocket.send_json({"type": "error", "content": "Monthly message quota exceeded"})
+                    await websocket.send_json(
+                        {"type": "error", "content": "Monthly message quota exceeded"}
+                    )
                     await websocket.close(code=4029)
                     return
 
             await websocket.send_json({"type": "start"})
 
             try:
-                async for token in stream_response(resolved_id, session_id, user_message, db):
+                async for token in stream_response(
+                    resolved_id, session_id, user_message, db
+                ):
                     await websocket.send_json({"type": "token", "content": token})
                 await websocket.send_json({"type": "end"})
 
@@ -178,7 +194,9 @@ async def chat_websocket(
                     await increment_message_count(redis_client, owner_email)
             except Exception as e:
                 logger.error(f"Stream error: {e}")
-                await websocket.send_json({"type": "error", "content": "An error occurred"})
+                await websocket.send_json(
+                    {"type": "error", "content": "An error occurred"}
+                )
 
     except WebSocketDisconnect:
         logger.info(f"WS disconnected: session={session_id}")

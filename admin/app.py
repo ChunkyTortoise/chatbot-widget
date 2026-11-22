@@ -1,6 +1,7 @@
 import os
-import streamlit as st
+
 import httpx
+import streamlit as st
 
 st.set_page_config(page_title="Chatbot Widget Admin", page_icon="🤖", layout="wide")
 
@@ -33,7 +34,14 @@ def api_get(path: str):
 
 def api_post(path: str, json=None, files=None, data=None):
     try:
-        r = httpx.post(f"{BASE}{path}", headers=HEADERS, json=json, files=files, data=data, timeout=30)
+        r = httpx.post(
+            f"{BASE}{path}",
+            headers=HEADERS,
+            json=json,
+            files=files,
+            data=data,
+            timeout=30,
+        )
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -62,7 +70,9 @@ def api_delete(path: str):
 
 
 # Navigation
-tab1, tab2, tab3, tab4 = st.tabs(["🤖 Chatbots", "📚 Knowledge Base", "💬 Embed Code", "🔍 Health"])
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["🤖 Chatbots", "📚 Knowledge Base", "💬 Embed Code", "🔍 Health"]
+)
 
 # --- Tab 1: Chatbots ---
 with tab1:
@@ -79,7 +89,9 @@ with tab1:
                 value="You are a helpful customer support assistant. Answer questions clearly and concisely based on the provided knowledge base. If you don't know something, say so honestly.",
                 height=120,
             )
-            welcome = st.text_input("Welcome Message", value="Hi! How can I help you today?")
+            welcome = st.text_input(
+                "Welcome Message", value="Hi! How can I help you today?"
+            )
             color = st.color_picker("Primary Color", value="#3B82F6")
             title = st.text_input("Chat Title", value="Chat with us")
             position = st.selectbox("Position", ["bottom-right", "bottom-left"])
@@ -88,17 +100,20 @@ with tab1:
             submitted = st.form_submit_button("Create Chatbot", type="primary")
 
             if submitted and name and system_prompt:
-                result = api_post("/api/v1/chatbots", json={
-                    "name": name,
-                    "system_prompt": system_prompt,
-                    "welcome_message": welcome,
-                    "primary_color": color,
-                    "title": title,
-                    "position": position,
-                    "owner_email": owner_email or None,
-                })
+                result = api_post(
+                    "/api/v1/chatbots",
+                    json={
+                        "name": name,
+                        "system_prompt": system_prompt,
+                        "welcome_message": welcome,
+                        "primary_color": color,
+                        "title": title,
+                        "position": position,
+                        "owner_email": owner_email or None,
+                    },
+                )
                 if result:
-                    st.success(f"Created! Save your API key — it won't be shown again:")
+                    st.success("Created! Save your API key — it won't be shown again:")
                     st.code(result.get("api_key", ""), language="text")
                     st.session_state["last_chatbot_id"] = str(result["id"])
                     st.rerun()
@@ -120,21 +135,36 @@ with tab1:
                 with st.expander("Edit Chatbot"):
                     with st.form("update_chatbot"):
                         u_name = st.text_input("Name", value=chatbot.get("name", ""))
-                        u_prompt = st.text_area("System Prompt", value=chatbot.get("system_prompt", ""), height=100)
-                        u_welcome = st.text_input("Welcome Message", value=chatbot.get("welcome_message", ""))
-                        u_color = st.color_picker("Color", value=chatbot.get("primary_color", "#3B82F6"))
+                        u_prompt = st.text_area(
+                            "System Prompt",
+                            value=chatbot.get("system_prompt", ""),
+                            height=100,
+                        )
+                        u_welcome = st.text_input(
+                            "Welcome Message", value=chatbot.get("welcome_message", "")
+                        )
+                        u_color = st.color_picker(
+                            "Color", value=chatbot.get("primary_color", "#3B82F6")
+                        )
                         u_title = st.text_input("Title", value=chatbot.get("title", ""))
-                        u_pos = st.selectbox("Position", ["bottom-right", "bottom-left"], index=0 if chatbot.get("position") == "bottom-right" else 1)
+                        u_pos = st.selectbox(
+                            "Position",
+                            ["bottom-right", "bottom-left"],
+                            index=0 if chatbot.get("position") == "bottom-right" else 1,
+                        )
 
                         if st.form_submit_button("Update"):
-                            api_put(f"/api/v1/chatbots/{chatbot_id}", json={
-                                "name": u_name,
-                                "system_prompt": u_prompt,
-                                "welcome_message": u_welcome,
-                                "primary_color": u_color,
-                                "title": u_title,
-                                "position": u_pos,
-                            })
+                            api_put(
+                                f"/api/v1/chatbots/{chatbot_id}",
+                                json={
+                                    "name": u_name,
+                                    "system_prompt": u_prompt,
+                                    "welcome_message": u_welcome,
+                                    "primary_color": u_color,
+                                    "title": u_title,
+                                    "position": u_pos,
+                                },
+                            )
                             st.success("Updated!")
                             st.rerun()
 
@@ -160,13 +190,20 @@ with tab2:
         if docs:
             st.subheader(f"Documents ({len(docs)})")
             for doc in docs:
-                status_icon = {"processed": "✅", "pending": "⏳", "failed": "❌", "processing": "🔄"}.get(doc["status"], "❓")
+                status_icon = {
+                    "processed": "✅",
+                    "pending": "⏳",
+                    "failed": "❌",
+                    "processing": "🔄",
+                }.get(doc["status"], "❓")
                 cols = st.columns([3, 1, 1, 1])
                 cols[0].write(f"{status_icon} **{doc['filename']}**")
                 cols[1].write(f"{doc['chunk_count']} chunks")
                 cols[2].write(doc["status"])
                 if cols[3].button("Delete", key=f"del_{doc['id']}"):
-                    if api_delete(f"/api/v1/chatbots/{kb_chatbot_id}/documents/{doc['id']}"):
+                    if api_delete(
+                        f"/api/v1/chatbots/{kb_chatbot_id}/documents/{doc['id']}"
+                    ):
                         st.success(f"Deleted {doc['filename']}")
                         st.rerun()
                 if doc.get("error_message"):
@@ -179,9 +216,13 @@ with tab2:
         uploaded = st.file_uploader("Upload PDF or TXT", type=["pdf", "txt"])
         if uploaded and st.button("Upload", type="primary"):
             files = {"file": (uploaded.name, uploaded.read(), uploaded.type)}
-            result = api_post(f"/api/v1/chatbots/{kb_chatbot_id}/documents", files=files)
+            result = api_post(
+                f"/api/v1/chatbots/{kb_chatbot_id}/documents", files=files
+            )
             if result:
-                st.success(f"Uploaded: {result['filename']} (status: {result['status']})")
+                st.success(
+                    f"Uploaded: {result['filename']} (status: {result['status']})"
+                )
                 st.rerun()
 
 # --- Tab 3: Embed Code ---
@@ -193,11 +234,17 @@ with tab3:
         key="embed_id",
         placeholder="Paste chatbot UUID",
     )
-    embed_api_key = st.text_input("API Key (from creation)", placeholder="cbk_...", type="password")
+    embed_api_key = st.text_input(
+        "API Key (from creation)", placeholder="cbk_...", type="password"
+    )
     embed_color = st.color_picker("Primary Color", value="#3B82F6", key="embed_color")
     embed_title = st.text_input("Chat Title", value="Chat with us", key="embed_title")
-    embed_pos = st.selectbox("Position", ["bottom-right", "bottom-left"], key="embed_pos")
-    embed_host = st.text_input("API Host", value="https://chatbot-widget-api.onrender.com")
+    embed_pos = st.selectbox(
+        "Position", ["bottom-right", "bottom-left"], key="embed_pos"
+    )
+    embed_host = st.text_input(
+        "API Host", value="https://chatbot-widget-api.onrender.com"
+    )
 
     if embed_id:
         embed_code = f"""<!-- Paste this before </body> on your website -->
@@ -210,7 +257,9 @@ with tab3:
 
         st.subheader("Your Embed Code")
         st.code(embed_code, language="html")
-        st.info("Copy this snippet and paste it into any HTML page, just before the `</body>` tag.")
+        st.info(
+            "Copy this snippet and paste it into any HTML page, just before the `</body>` tag."
+        )
 
         st.subheader("Live Preview")
         iframe_html = f"""

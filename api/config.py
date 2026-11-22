@@ -3,9 +3,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
-    database_url: str = "postgresql+asyncpg://chatbot:chatbot@localhost:5432/chatbot_widget"
+    database_url: str = (
+        "postgresql+asyncpg://chatbot:chatbot@localhost:5432/chatbot_widget"
+    )
     redis_url: str = "redis://localhost:6379/0"
     anthropic_api_key: str = ""
     admin_key: str = "dev-admin-key"
@@ -32,8 +36,8 @@ class Settings(BaseSettings):
     # Demo mode — bypasses auth and Stripe
     demo_mode: bool = False
 
-    @model_validator(mode='after')
-    def _check_dev_defaults(self) -> 'Settings':
+    @model_validator(mode="after")
+    def _check_dev_defaults(self) -> "Settings":
         if self.environment != "development":
             dev_defaults = []
             if self.admin_key == "dev-admin-key":

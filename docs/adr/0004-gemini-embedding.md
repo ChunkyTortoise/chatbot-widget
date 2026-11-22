@@ -1,7 +1,7 @@
 # ADR 0004: Gemini Embedding over OpenAI for Vectors
 
-**Status:** Accepted  
-**Date:** 2025-12-15  
+**Status:** Accepted
+**Date:** 2025-12-15
 **Decision Makers:** Cayman Roden
 
 ## Context

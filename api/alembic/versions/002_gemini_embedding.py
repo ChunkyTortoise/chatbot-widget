@@ -5,8 +5,9 @@ Revises: 001
 Create Date: 2026-03-15
 
 """
-from alembic import op
+
 import sqlalchemy as sa
+from alembic import op
 from pgvector.sqlalchemy import Vector
 
 revision = "002"
@@ -22,4 +23,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_column("document_chunks", "embedding")
-    op.add_column("document_chunks", sa.Column("embedding", Vector(384), nullable=False))
+    op.add_column(
+        "document_chunks", sa.Column("embedding", Vector(384), nullable=False)
+    )

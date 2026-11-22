@@ -1,12 +1,14 @@
 from dataclasses import dataclass
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+
 from api.models.knowledge_doc import KnowledgeDoc
 
 KB_LIMITS: dict[str, int] = {
-    "free": 10 * 1024 * 1024,       # 10 MB
-    "pro": 500 * 1024 * 1024,       # 500 MB
-    "business": -1,                   # unlimited
+    "free": 10 * 1024 * 1024,  # 10 MB
+    "pro": 500 * 1024 * 1024,  # 500 MB
+    "business": -1,  # unlimited
 }
 
 
@@ -28,7 +30,9 @@ async def check_knowledge_base_quota(
         return KBQuotaResult(allowed=True, current_bytes=0, limit_bytes=-1)
 
     result = await db.execute(
-        select(func.coalesce(func.sum(func.length(KnowledgeDoc.content_text)), 0)).where(
+        select(
+            func.coalesce(func.sum(func.length(KnowledgeDoc.content_text)), 0)
+        ).where(
             KnowledgeDoc.chatbot_id == chatbot_id,
         )
     )

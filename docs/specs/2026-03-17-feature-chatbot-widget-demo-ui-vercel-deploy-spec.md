@@ -81,6 +81,7 @@ from fastapi.responses import FileResponse
 router = APIRouter()
 _STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 
+
 @router.get("/demo", include_in_schema=False)
 async def demo_ui() -> FileResponse:
     return FileResponse(_STATIC_DIR / "demo.html", media_type="text/html")
@@ -89,6 +90,7 @@ async def demo_ui() -> FileResponse:
 Register in `api/routes/__init__.py`:
 ```python
 from api.routes.demo import router as demo_router
+
 api_router.include_router(demo_router, tags=["demo"])
 ```
 

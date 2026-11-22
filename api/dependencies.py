@@ -2,13 +2,15 @@ import hashlib
 import hmac
 import uuid
 from typing import AsyncGenerator, Optional
-from fastapi import Header, HTTPException, status, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+
 import redis.asyncio as aioredis
-from api.models.database import AsyncSessionLocal
+from fastapi import Depends, Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.config import settings
+from api.models.database import AsyncSessionLocal
 
 _redis_pool: aioredis.Redis | None = None
 _bearer = HTTPBearer(auto_error=False)
@@ -37,7 +39,9 @@ def verify_api_key_hash(plain: str, stored_hash: str) -> bool:
 
 async def get_admin_key(x_admin_key: str = Header(...)) -> str:
     if not hmac.compare_digest(x_admin_key, settings.admin_key):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin key")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin key"
+        )
     return x_admin_key
 
 
@@ -55,7 +59,9 @@ async def get_admin_or_owner(
     if x_admin_key is not None:
         if hmac.compare_digest(x_admin_key, settings.admin_key):
             return x_admin_key
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin key")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin key"
+        )
 
     # 2. Fall back to JWT
     if not credentials:
@@ -66,10 +72,12 @@ async def get_admin_or_owner(
         )
 
     from api.auth.middleware import _decode_token
+
     user = _decode_token(credentials.credentials)
 
     # 3. Verify ownership
     from api.models.chatbot import Chatbot
+
     result = await db.execute(
         select(Chatbot).where(
             Chatbot.id == chatbot_id,
@@ -78,6 +86,9 @@ async def get_admin_or_owner(
         )
     )
     if not result.scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not the owner of this chatbot")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not the owner of this chatbot",
+        )
 
     return user.email
