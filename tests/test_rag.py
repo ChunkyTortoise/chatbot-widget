@@ -80,6 +80,20 @@ class TestEmbedder:
             assert all(len(v) == 768 for v in result)
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize("embeddings", [None, [], [MagicMock(values=None)]])
+    async def test_embed_rejects_response_without_vector(self, embeddings):
+        mock_client = MagicMock()
+        mock_client.aio.models.embed_content = AsyncMock(return_value=MagicMock(embeddings=embeddings))
+
+        with patch("api.services.embedder._get_client", return_value=mock_client):
+            from api.services.embedder import embed, embed_batch
+
+            with pytest.raises(RuntimeError, match="returned no embedding"):
+                await embed("test text")
+            with pytest.raises(RuntimeError, match="returned no embedding"):
+                await embed_batch(["a"])
+
+    @pytest.mark.asyncio
     async def test_embed_truncates_long_text(self):
         mock_client = MagicMock()
         mock_embedding = MagicMock()
