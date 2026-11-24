@@ -16,6 +16,18 @@ def _get_client() -> genai.Client:
     return genai.Client(api_key=settings.gemini_api_key)
 
 
+def _vectors(result: types.EmbedContentResponse) -> list[list[float]]:
+    """Return every vector in the response; the SDK types both levels as optional."""
+    vectors: list[list[float]] = []
+    for item in result.embeddings or []:
+        if item.values is None:
+            raise RuntimeError("Gemini returned no embedding values for an input")
+        vectors.append(list(item.values))
+    if not vectors:
+        raise RuntimeError("Gemini returned no embedding")
+    return vectors
+
+
 async def embed(text: str, task_type: str = TASK_QUERY) -> list[float]:
     client = _get_client()
     result = await client.aio.models.embed_content(
@@ -26,7 +38,7 @@ async def embed(text: str, task_type: str = TASK_QUERY) -> list[float]:
             output_dimensionality=OUTPUT_DIM,
         ),
     )
-    return list(result.embeddings[0].values)
+    return _vectors(result)[0]
 
 
 async def embed_batch(
@@ -42,4 +54,4 @@ async def embed_batch(
             output_dimensionality=OUTPUT_DIM,
         ),
     )
-    return [list(e.values) for e in result.embeddings]
+    return _vectors(result)
