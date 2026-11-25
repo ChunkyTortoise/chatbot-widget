@@ -1,9 +1,12 @@
-import uuid
 import logging
+import uuid
+from datetime import datetime, timezone
 from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+
 import anthropic
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.config import settings
 from api.models.chatbot import Chatbot
 from api.models.conversation import Conversation
@@ -11,7 +14,6 @@ from api.models.message import Message
 from api.services.embedder import embed
 from api.services.retriever import similarity_search
 from api.services.webhook_dispatcher import dispatch_event
-from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +41,9 @@ async def get_or_create_conversation(
     return conv
 
 
-async def get_history(conversation_id: uuid.UUID, db: AsyncSession, limit: int = 10) -> list[Message]:
+async def get_history(
+    conversation_id: uuid.UUID, db: AsyncSession, limit: int = 10
+) -> list[Message]:
     result = await db.execute(
         select(Message)
         .where(Message.conversation_id == conversation_id)
@@ -49,7 +53,9 @@ async def get_history(conversation_id: uuid.UUID, db: AsyncSession, limit: int =
     return list(reversed(result.scalars().all()))
 
 
-async def save_message(conversation_id: uuid.UUID, role: str, content: str, db: AsyncSession) -> Message:
+async def save_message(
+    conversation_id: uuid.UUID, role: str, content: str, db: AsyncSession
+) -> Message:
     msg = Message(
         id=uuid.uuid4(),
         conversation_id=conversation_id,
@@ -79,7 +85,9 @@ async def stream_response(
 ) -> AsyncGenerator[str, None]:
     """Stream response tokens from Claude with RAG context."""
     # Get chatbot config
-    result = await db.execute(select(Chatbot).where(Chatbot.id == chatbot_id, Chatbot.is_active == True))
+    result = await db.execute(
+        select(Chatbot).where(Chatbot.id == chatbot_id, Chatbot.is_active == True)
+    )
     chatbot = result.scalar_one_or_none()
     if not chatbot:
         yield "Error: chatbot not found"
@@ -109,7 +117,9 @@ async def stream_response(
     low_confidence = False
     try:
         query_embedding = await embed(user_message)
-        chunks = await similarity_search(query_embedding, chatbot_id, settings.retrieval_top_k, db)
+        chunks = await similarity_search(
+            query_embedding, chatbot_id, settings.retrieval_top_k, db
+        )
         if chunks:
             context_parts = [row.chunk_text for row, _ in chunks]
             context_text = "\n\n".join(context_parts)
@@ -123,8 +133,16 @@ async def stream_response(
         logger.warning(f"RAG retrieval failed: {e}")
 
     # Check for explicit escalation phrases
-    escalation_phrases = ["talk to a human", "speak to someone", "real person", "human agent", "talk to support"]
-    explicit_escalation = any(phrase in user_message.lower() for phrase in escalation_phrases)
+    escalation_phrases = [
+        "talk to a human",
+        "speak to someone",
+        "real person",
+        "human agent",
+        "talk to support",
+    ]
+    explicit_escalation = any(
+        phrase in user_message.lower() for phrase in escalation_phrases
+    )
 
     if low_confidence or explicit_escalation:
         reason = "explicit_request" if explicit_escalation else "low_rag_confidence"
@@ -136,6 +154,7 @@ async def stream_response(
         if hasattr(chatbot, "slack_webhook_url") and chatbot.slack_webhook_url:
             try:
                 import httpx
+
                 slack_payload = {
                     "text": f"Escalation needed for chatbot *{chatbot.name}*\n"
                     f"Reason: {reason}\n"

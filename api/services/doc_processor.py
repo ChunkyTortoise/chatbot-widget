@@ -1,9 +1,11 @@
-import uuid
 import logging
-from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+
 from sqlalchemy import select, update
-from api.models.knowledge_doc import KnowledgeDoc
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.models.document_chunk import DocumentChunk
+from api.models.knowledge_doc import KnowledgeDoc
 from api.services.chunker import chunk_text
 from api.services.embedder import embed_batch
 
@@ -21,7 +23,9 @@ async def process_document(doc_id: uuid.UUID, db: AsyncSession) -> None:
 
     try:
         await db.execute(
-            update(KnowledgeDoc).where(KnowledgeDoc.id == doc_id).values(status="processing")
+            update(KnowledgeDoc)
+            .where(KnowledgeDoc.id == doc_id)
+            .values(status="processing")
         )
         await db.commit()
 
@@ -32,6 +36,7 @@ async def process_document(doc_id: uuid.UUID, db: AsyncSession) -> None:
         embeddings = await embed_batch(chunks)
 
         from datetime import datetime, timezone
+
         now = datetime.now(timezone.utc)
 
         chunk_objs = [

@@ -1,18 +1,20 @@
-import uuid
-import logging
 import asyncio
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+import logging
+import uuid
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
-from api.dependencies import get_db, get_admin_or_owner, get_redis
-from api.models.database import AsyncSessionLocal
-from api.models.knowledge_doc import KnowledgeDoc
-from api.models.document_chunk import DocumentChunk
-from api.schemas.chatbot import DocumentResponse
-from api.services.doc_processor import process_document
+
 from api.billing.kb_quota import check_knowledge_base_quota
 from api.billing.quota import get_user_plan
-from datetime import datetime, timezone
+from api.dependencies import get_admin_or_owner, get_db, get_redis
+from api.models.database import AsyncSessionLocal
+from api.models.document_chunk import DocumentChunk
+from api.models.knowledge_doc import KnowledgeDoc
+from api.schemas.chatbot import DocumentResponse
+from api.services.doc_processor import process_document
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 def _extract_text(content: bytes, filename: str) -> str:
     if filename.lower().endswith(".pdf"):
         import fitz  # PyMuPDF
+
         doc = fitz.open(stream=content, filetype="pdf")
         return "\n\n".join(page.get_text() for page in doc)
     return content.decode("utf-8", errors="replace")
@@ -34,7 +37,9 @@ async def _process_document_background(doc_id: uuid.UUID) -> None:
         try:
             await process_document(doc_id, session)
         except Exception as e:
-            logger.error(f"Background doc processing failed for {doc_id}: {e}", exc_info=True)
+            logger.error(
+                f"Background doc processing failed for {doc_id}: {e}", exc_info=True
+            )
         finally:
             await session.close()
 
@@ -53,7 +58,7 @@ async def upload_document(
     if not quota.allowed:
         raise HTTPException(
             status_code=413,
-            detail=f"Knowledge base limit reached ({quota.current_bytes // (1024*1024)}MB / {quota.limit_bytes // (1024*1024)}MB). Upgrade your plan.",
+            detail=f"Knowledge base limit reached ({quota.current_bytes // (1024 * 1024)}MB / {quota.limit_bytes // (1024 * 1024)}MB). Upgrade your plan.",
         )
 
     content = await file.read()

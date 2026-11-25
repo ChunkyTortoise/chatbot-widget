@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function NavActions() {
-  const router = useRouter()
-  const [loggedIn, setLoggedIn] = useState(false)
+  const router = useRouter();
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    setLoggedIn(!!localStorage.getItem('token'))
-  }, [])
+    setLoggedIn(!!localStorage.getItem("token"));
+  }, []);
 
   function handleLogout() {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user_email')
-    setLoggedIn(false)
-    router.push('/login')
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_email");
+    setLoggedIn(false);
+    router.push("/login");
   }
 
   if (loggedIn) {
@@ -27,12 +27,15 @@ export function NavActions() {
       >
         Logout
       </button>
-    )
+    );
   }
 
   return (
-    <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+    <Link
+      href="/login"
+      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+    >
       Login
     </Link>
-  )
+  );
 }

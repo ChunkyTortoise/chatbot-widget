@@ -1,65 +1,73 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import Link from 'next/link'
-import { FileText, MessageCircle, Save, BarChart3, MessagesSquare, TrendingUp } from 'lucide-react'
-import { apiFetch } from '@/lib/api'
-import { EmbedSnippet } from '@/components/EmbedSnippet'
-import { TimeseriesChart } from '@/components/TimeseriesChart'
-import type { Chatbot, Analytics } from '@/lib/types'
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import {
+  FileText,
+  MessageCircle,
+  Save,
+  MessagesSquare,
+  TrendingUp,
+} from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import { EmbedSnippet } from "@/components/EmbedSnippet";
+import { TimeseriesChart } from "@/components/TimeseriesChart";
+import type { Chatbot, Analytics } from "@/lib/types";
 
 export default function ChatbotDetailPage() {
-  const params = useParams()
-  const chatbotId = params.id as string
+  const params = useParams();
+  const chatbotId = params.id as string;
 
-  const [chatbot, setChatbot] = useState<Chatbot | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [chatbot, setChatbot] = useState<Chatbot | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
 
   // Editable fields
-  const [name, setName] = useState('')
-  const [systemPrompt, setSystemPrompt] = useState('')
-  const [welcomeMessage, setWelcomeMessage] = useState('')
-  const [primaryColor, setPrimaryColor] = useState('')
-  const [title, setTitle] = useState('')
+  const [name, setName] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState("");
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+  const [primaryColor, setPrimaryColor] = useState("");
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
-    apiFetch<Chatbot[]>('/api/v1/chatbots')
+    apiFetch<Chatbot[]>("/api/v1/chatbots")
       .then((chatbots) => {
-        const found = chatbots.find((c) => c.id === chatbotId)
+        const found = chatbots.find((c) => c.id === chatbotId);
         if (!found) {
-          setError('Chatbot not found')
-          return
+          setError("Chatbot not found");
+          return;
         }
-        setChatbot(found)
-        setName(found.name)
-        setSystemPrompt(found.system_prompt)
-        setWelcomeMessage(found.welcome_message)
-        setPrimaryColor(found.primary_color)
-        setTitle(found.title)
+        setChatbot(found);
+        setName(found.name);
+        setSystemPrompt(found.system_prompt);
+        setWelcomeMessage(found.welcome_message);
+        setPrimaryColor(found.primary_color);
+        setTitle(found.title);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load chatbot'))
-      .finally(() => setLoading(false))
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "Failed to load chatbot"),
+      )
+      .finally(() => setLoading(false));
 
     apiFetch<Analytics>(`/api/v1/chatbots/${chatbotId}/analytics`)
       .then(setAnalytics)
-      .catch(() => {})
-  }, [chatbotId])
+      .catch(() => {});
+  }, [chatbotId]);
 
   async function handleSave(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-    setSaving(true)
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setSaving(true);
 
     try {
       const updated = await apiFetch<Chatbot>(`/api/v1/chatbots/${chatbotId}`, {
-        method: 'PUT',
+        method: "PUT",
         body: JSON.stringify({
           name,
           system_prompt: systemPrompt,
@@ -67,14 +75,14 @@ export default function ChatbotDetailPage() {
           primary_color: primaryColor,
           title,
         }),
-      })
-      setChatbot(updated)
-      setSuccess('Settings saved')
-      setTimeout(() => setSuccess(''), 3000)
+      });
+      setChatbot(updated);
+      setSuccess("Settings saved");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save')
+      setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
   }
 
@@ -83,15 +91,15 @@ export default function ChatbotDetailPage() {
       <div className="mx-auto max-w-3xl px-4 py-12">
         <p className="text-muted-foreground">Loading...</p>
       </div>
-    )
+    );
   }
 
   if (!chatbot) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <p className="text-red-700">{error || 'Chatbot not found'}</p>
+        <p className="text-red-700">{error || "Chatbot not found"}</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -122,23 +130,35 @@ export default function ChatbotDetailPage() {
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <MessageCircle className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Conversations</span>
+              <span className="text-xs font-medium uppercase tracking-wide">
+                Conversations
+              </span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{analytics.total_conversations}</p>
+            <p className="text-2xl font-bold text-foreground">
+              {analytics.total_conversations}
+            </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <MessagesSquare className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Messages</span>
+              <span className="text-xs font-medium uppercase tracking-wide">
+                Messages
+              </span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{analytics.total_messages}</p>
+            <p className="text-2xl font-bold text-foreground">
+              {analytics.total_messages}
+            </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Avg / Conv</span>
+              <span className="text-xs font-medium uppercase tracking-wide">
+                Avg / Conv
+              </span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{analytics.avg_messages_per_conversation}</p>
+            <p className="text-2xl font-bold text-foreground">
+              {analytics.avg_messages_per_conversation}
+            </p>
           </div>
         </div>
       )}
@@ -159,17 +179,29 @@ export default function ChatbotDetailPage() {
 
       {/* Settings form */}
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
       )}
       {success && (
-        <div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">{success}</div>
+        <div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">
+          {success}
+        </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-5 rounded-lg border border-border bg-card p-6">
+      <form
+        onSubmit={handleSave}
+        className="space-y-5 rounded-lg border border-border bg-card p-6"
+      >
         <h2 className="font-semibold text-foreground">Settings</h2>
 
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">Name</label>
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
+            Name
+          </label>
           <input
             id="name"
             type="text"
@@ -181,7 +213,12 @@ export default function ChatbotDetailPage() {
         </div>
 
         <div>
-          <label htmlFor="system_prompt" className="block text-sm font-medium text-foreground mb-1">System Prompt</label>
+          <label
+            htmlFor="system_prompt"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
+            System Prompt
+          </label>
           <textarea
             id="system_prompt"
             rows={4}
@@ -193,7 +230,12 @@ export default function ChatbotDetailPage() {
         </div>
 
         <div>
-          <label htmlFor="welcome_message" className="block text-sm font-medium text-foreground mb-1">Welcome Message</label>
+          <label
+            htmlFor="welcome_message"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
+            Welcome Message
+          </label>
           <input
             id="welcome_message"
             type="text"
@@ -205,7 +247,12 @@ export default function ChatbotDetailPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="primary_color" className="block text-sm font-medium text-foreground mb-1">Primary Color</label>
+            <label
+              htmlFor="primary_color"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
+              Primary Color
+            </label>
             <div className="flex items-center gap-2">
               <input
                 id="primary_color"
@@ -214,11 +261,18 @@ export default function ChatbotDetailPage() {
                 onChange={(e) => setPrimaryColor(e.target.value)}
                 className="h-9 w-12 cursor-pointer rounded border border-input"
               />
-              <span className="text-sm text-muted-foreground">{primaryColor}</span>
+              <span className="text-sm text-muted-foreground">
+                {primaryColor}
+              </span>
             </div>
           </div>
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-1">Widget Title</label>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
+              Widget Title
+            </label>
             <input
               id="title"
               type="text"
@@ -235,9 +289,9 @@ export default function ChatbotDetailPage() {
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {saving ? 'Saving...' : 'Save changes'}
+          {saving ? "Saving..." : "Save changes"}
         </button>
       </form>
     </div>
-  )
+  );
 }

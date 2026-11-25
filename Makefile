@@ -1,4 +1,4 @@
-.PHONY: widget test lint
+.PHONY: widget test lint format typecheck
 
 widget:
 	@echo "Building chatbot widget..."
@@ -12,4 +12,11 @@ test:
 	pytest tests/ -q --tb=short
 
 lint:
-	ruff check api/ tests/ --ignore E501
+	ruff check .
+	ruff format --check .
+
+format:
+	ruff format .
+
+typecheck:
+	mypy

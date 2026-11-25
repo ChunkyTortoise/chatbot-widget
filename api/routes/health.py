@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text
 import redis.asyncio as aioredis
+from fastapi import APIRouter, Depends
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.dependencies import get_db, get_redis
 
 router = APIRouter()
@@ -27,4 +28,8 @@ async def health_check(
     except Exception:
         pass
 
-    return {"status": "healthy" if db_ok and redis_ok else "degraded", "db_ok": db_ok, "redis_ok": redis_ok}
+    return {
+        "status": "healthy" if db_ok and redis_ok else "degraded",
+        "db_ok": db_ok,
+        "redis_ok": redis_ok,
+    }

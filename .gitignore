@@ -14,3 +14,13 @@ widget/node_modules/
 
 # github-maintainer skill artifacts
 .maintenance/
+.coverage
+.coverage.*
+node_modules/
+.env
+.env.*
+!.env.example
+coverage/
+*.tsbuildinfo
+.mypy_cache/
+.ruff_cache/

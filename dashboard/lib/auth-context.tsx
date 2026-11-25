@@ -1,41 +1,48 @@
-'use client'
+"use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react";
+import { useRouter } from "next/navigation";
 
 interface AuthState {
-  token: string | null
-  isLoading: boolean
-  logout: () => void
+  token: string | null;
+  isLoading: boolean;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthState | null>(null)
+const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    setToken(localStorage.getItem('token'))
-    setIsLoading(false)
-  }, [])
+    setToken(localStorage.getItem("token"));
+    setIsLoading(false);
+  }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token')
-    setToken(null)
-    router.push('/login')
-  }, [router])
+    localStorage.removeItem("token");
+    setToken(null);
+    router.push("/login");
+  }, [router]);
 
   return (
     <AuthContext.Provider value={{ token, isLoading, logout }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 }

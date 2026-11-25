@@ -1,24 +1,28 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Plus } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { apiFetch } from '@/lib/api'
-import { ChatbotCard } from '@/components/ChatbotCard'
-import type { Chatbot } from '@/lib/types'
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import { motion } from "framer-motion";
+import { apiFetch } from "@/lib/api";
+import { ChatbotCard } from "@/components/ChatbotCard";
+import type { Chatbot } from "@/lib/types";
 
 export default function DashboardPage() {
-  const [chatbots, setChatbots] = useState<Chatbot[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [chatbots, setChatbots] = useState<Chatbot[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    apiFetch<Chatbot[]>('/api/v1/chatbots')
+    apiFetch<Chatbot[]>("/api/v1/chatbots")
       .then(setChatbots)
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load chatbots'))
-      .finally(() => setLoading(false))
-  }, [])
+      .catch((err) =>
+        setError(
+          err instanceof Error ? err.message : "Failed to load chatbots",
+        ),
+      )
+      .finally(() => setLoading(false));
+  }, []);
 
   if (loading) {
     return (
@@ -29,7 +33,10 @@ export default function DashboardPage() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-lg border border-border bg-card p-5">
+            <div
+              key={i}
+              className="rounded-lg border border-border bg-card p-5"
+            >
               <div className="flex items-center gap-3">
                 <div className="skeleton h-10 w-10 rounded-lg" />
                 <div className="flex-1 space-y-2">
@@ -41,7 +48,7 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -81,12 +88,22 @@ export default function DashboardPage() {
           className="grid gap-4 md:grid-cols-2"
           initial="hidden"
           animate="visible"
-          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08 } },
+          }}
         >
           {chatbots.map((chatbot) => (
             <motion.div
               key={chatbot.id}
-              variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } } }}
+              variants={{
+                hidden: { opacity: 0, y: 16 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                },
+              }}
             >
               <ChatbotCard chatbot={chatbot} />
             </motion.div>
@@ -94,5 +111,5 @@ export default function DashboardPage() {
         </motion.div>
       )}
     </div>
-  )
+  );
 }

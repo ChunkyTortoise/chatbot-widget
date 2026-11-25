@@ -1,6 +1,7 @@
-import pytest
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from api.config import settings
 
@@ -12,8 +13,10 @@ settings.admin_key = "dev-admin-key"
 @pytest.fixture
 def mock_embed():
     """Returns a fixed 768-dim vector (async)."""
-    with patch("api.services.embedder.embed", new_callable=AsyncMock) as m1, \
-         patch("api.services.chat_service.embed", new_callable=AsyncMock) as m2:
+    with (
+        patch("api.services.embedder.embed", new_callable=AsyncMock) as m1,
+        patch("api.services.chat_service.embed", new_callable=AsyncMock) as m2,
+    ):
         m1.return_value = [0.1] * 768
         m2.return_value = [0.1] * 768
         yield m1
@@ -22,11 +25,14 @@ def mock_embed():
 @pytest.fixture
 def mock_embed_batch():
     """Returns fixed 768-dim vectors for a batch (async)."""
+
     async def _batch(texts, **kwargs):
         return [[0.1] * 768 for _ in texts]
 
-    with patch("api.services.embedder.embed_batch", new_callable=AsyncMock) as m1, \
-         patch("api.services.doc_processor.embed_batch", new_callable=AsyncMock) as m2:
+    with (
+        patch("api.services.embedder.embed_batch", new_callable=AsyncMock) as m1,
+        patch("api.services.doc_processor.embed_batch", new_callable=AsyncMock) as m2,
+    ):
         m1.side_effect = _batch
         m2.side_effect = _batch
         yield m1
@@ -79,9 +85,10 @@ def mock_redis():
 @pytest.fixture
 async def client(mock_db, mock_redis):
     """Test client with dependency overrides for DB and Redis."""
-    from httpx import AsyncClient, ASGITransport
-    from api.main import app
+    from httpx import ASGITransport, AsyncClient
+
     from api.dependencies import get_db, get_redis
+    from api.main import app
 
     async def override_get_db():
         yield mock_db
@@ -92,7 +99,9 @@ async def client(mock_db, mock_redis):
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_redis] = override_get_redis
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
         yield c
 
     app.dependency_overrides.clear()
@@ -111,15 +120,17 @@ def chatbot_id():
 @pytest.fixture
 async def demo_client(mock_redis):
     """Test client with DEMO_MODE enabled and demo chatbot in mock DB."""
-    from httpx import AsyncClient, ASGITransport
-    from api.main import app
-    from api.dependencies import get_db, get_redis
+    import hashlib
+    from datetime import datetime, timezone
+
+    from httpx import ASGITransport, AsyncClient
+
     from api.config import settings
-    from api.seed import DEMO_CHATBOT_NAME, DEMO_OWNER_EMAIL
+    from api.dependencies import get_db, get_redis
+    from api.main import app
     from api.models.chatbot import Chatbot
     from api.models.conversation import Conversation
-    from datetime import datetime, timezone
-    import hashlib
+    from api.seed import DEMO_CHATBOT_NAME, DEMO_OWNER_EMAIL
 
     # Enable demo mode
     original_demo_mode = settings.demo_mode
@@ -149,7 +160,7 @@ async def demo_client(mock_redis):
 
     # Create a mock DB session that returns appropriate objects
     mock_db = AsyncMock()
-    
+
     def make_result(obj):
         """Create a mock result that returns the given object."""
         result = MagicMock()
@@ -164,26 +175,30 @@ async def demo_client(mock_redis):
         # SQLAlchemy queries have column_descriptions that tell us the table
         try:
             # For SELECT queries, check the entity
-            if hasattr(query, 'column_descriptions') and query.column_descriptions:
-                entity = query.column_descriptions[0].get('entity')
-                entity_name = entity.__name__ if entity and hasattr(entity, '__name__') else str(entity)
-                
-                if 'Chatbot' in entity_name:
+            if hasattr(query, "column_descriptions") and query.column_descriptions:
+                entity = query.column_descriptions[0].get("entity")
+                entity_name = (
+                    entity.__name__
+                    if entity and hasattr(entity, "__name__")
+                    else str(entity)
+                )
+
+                if "Chatbot" in entity_name:
                     return make_result(demo_chatbot)
-                elif 'Conversation' in entity_name:
+                elif "Conversation" in entity_name:
                     return make_result(demo_conversation)
         except Exception:
             pass
-        
+
         # Fallback: check string representation
         query_str = str(query)
         if "chatbot" in query_str.lower() and "conversation" not in query_str.lower():
             return make_result(demo_chatbot)
         elif "conversation" in query_str.lower():
             return make_result(demo_conversation)
-        
+
         return make_result(None)
-    
+
     mock_db.execute = mock_execute
     mock_db.add = MagicMock()
     mock_db.commit = AsyncMock()
@@ -198,7 +213,9 @@ async def demo_client(mock_redis):
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_redis] = override_get_redis
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
         yield c
 
     app.dependency_overrides.clear()

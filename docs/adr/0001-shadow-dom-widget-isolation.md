@@ -1,7 +1,7 @@
 # ADR 0001: Shadow DOM for Widget Isolation
 
-**Status:** Accepted  
-**Date:** 2025-12-15  
+**Status:** Accepted
+**Date:** 2025-12-15
 **Decision Makers:** Cayman Roden
 
 ## Context

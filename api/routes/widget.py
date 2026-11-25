@@ -1,4 +1,5 @@
 import os
+
 from fastapi import APIRouter
 from fastapi.responses import FileResponse, Response
 
@@ -13,7 +14,9 @@ WIDGET_DIR = os.path.join(
 async def serve_widget_js():
     path = os.path.join(WIDGET_DIR, "src", "chatbot.js")
     if not os.path.exists(path):
-        return Response(content="// Widget not found", media_type="application/javascript")
+        return Response(
+            content="// Widget not found", media_type="application/javascript"
+        )
     return FileResponse(path, media_type="application/javascript")
 
 
@@ -23,7 +26,9 @@ async def serve_widget_min_js():
     src_path = os.path.join(WIDGET_DIR, "src", "chatbot.js")
     path = min_path if os.path.exists(min_path) else src_path
     if not os.path.exists(path):
-        return Response(content="// Widget not found", media_type="application/javascript")
+        return Response(
+            content="// Widget not found", media_type="application/javascript"
+        )
     return FileResponse(
         path,
         media_type="application/javascript",

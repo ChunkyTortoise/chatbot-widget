@@ -1,7 +1,9 @@
 from api.config import settings
 
 
-def chunk_text(text: str, chunk_size: int | None = None, overlap: int | None = None) -> list[str]:
+def chunk_text(
+    text: str, chunk_size: int | None = None, overlap: int | None = None
+) -> list[str]:
     chunk_size = chunk_size or settings.chunk_size
     overlap = overlap or settings.chunk_overlap
 
@@ -15,7 +17,9 @@ def chunk_text(text: str, chunk_size: int | None = None, overlap: int | None = N
             chunks.append(current.strip())
             # Start new chunk with overlap
             words = current.split()
-            overlap_text = " ".join(words[-overlap:]) if len(words) > overlap else current
+            overlap_text = (
+                " ".join(words[-overlap:]) if len(words) > overlap else current
+            )
             current = overlap_text + " " + sentence
         else:
             current += (" " if current else "") + sentence
@@ -28,6 +32,7 @@ def chunk_text(text: str, chunk_size: int | None = None, overlap: int | None = N
 
 def _split_sentences(text: str) -> list[str]:
     import re
+
     # Split on sentence-ending punctuation followed by whitespace
     parts = re.split(r"(?<=[.!?])\s+", text)
     return [p for p in parts if p.strip()]

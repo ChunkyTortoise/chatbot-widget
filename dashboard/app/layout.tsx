@@ -1,21 +1,21 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import Link from 'next/link'
-import { NavActions } from '@/components/NavActions'
-import { Providers } from './providers'
-import './globals.css'
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import Link from "next/link";
+import { NavActions } from "@/components/NavActions";
+import { Providers } from "./providers";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Chatbot Widget Dashboard',
-  description: 'Embed AI chat on any website in 60 seconds',
-}
+  title: "Chatbot Widget Dashboard",
+  description: "Embed AI chat on any website in 60 seconds",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -26,13 +26,22 @@ export default function RootLayout({
               ChatWidget
             </Link>
             <nav className="flex items-center gap-4">
-              <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link
+                href="/dashboard"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
                 Dashboard
               </Link>
-              <Link href="/playground" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link
+                href="/playground"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
                 Playground
               </Link>
-              <Link href="/dashboard/billing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link
+                href="/dashboard/billing"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
                 Billing
               </Link>
               <NavActions />
@@ -44,5 +53,5 @@ export default function RootLayout({
         </Providers>
       </body>
     </html>
-  )
+  );
 }

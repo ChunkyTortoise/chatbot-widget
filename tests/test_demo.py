@@ -1,6 +1,7 @@
 """Tests for demo UI and demo login functionality."""
-import pytest
 from pathlib import Path
+
+import pytest
 from httpx import AsyncClient
 
 

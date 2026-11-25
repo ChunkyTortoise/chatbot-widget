@@ -1,4 +1,5 @@
 import uuid
+
 from sqlalchemy import Row, text
 from sqlalchemy.ext.asyncio import AsyncSession
 

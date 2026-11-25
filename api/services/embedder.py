@@ -1,6 +1,8 @@
 from functools import lru_cache
+
 from google import genai
 from google.genai import types
+
 from api.config import settings
 
 MAX_CHARS = 2000
@@ -39,7 +41,9 @@ async def embed(text: str, task_type: str = TASK_QUERY) -> list[float]:
     return _vectors(result)[0]
 
 
-async def embed_batch(texts: list[str], task_type: str = TASK_DOCUMENT) -> list[list[float]]:
+async def embed_batch(
+    texts: list[str], task_type: str = TASK_DOCUMENT
+) -> list[list[float]]:
     client = _get_client()
     truncated = [t[:MAX_CHARS] for t in texts]
     result = await client.aio.models.embed_content(

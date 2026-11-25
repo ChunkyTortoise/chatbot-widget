@@ -1,53 +1,74 @@
-import Link from 'next/link'
-import { MessageSquare, Zap, Database, Users } from 'lucide-react'
+import Link from "next/link";
+import { MessageSquare, Zap, Database, Users } from "lucide-react";
 
 const features = [
   {
     icon: Zap,
-    title: 'Easy Embed',
-    description: 'Add a single script tag to your site. Works everywhere — WordPress, Shopify, static HTML.',
+    title: "Easy Embed",
+    description:
+      "Add a single script tag to your site. Works everywhere — WordPress, Shopify, static HTML.",
   },
   {
     icon: Database,
-    title: 'RAG-Powered',
-    description: 'Upload your docs and the chatbot answers from your knowledge base using vector search.',
+    title: "RAG-Powered",
+    description:
+      "Upload your docs and the chatbot answers from your knowledge base using vector search.",
   },
   {
     icon: Users,
-    title: 'Multi-tenant',
-    description: 'Each customer gets their own chatbot with isolated data, branding, and API keys.',
+    title: "Multi-tenant",
+    description:
+      "Each customer gets their own chatbot with isolated data, branding, and API keys.",
   },
-]
+];
 
 const plans = [
   {
-    name: 'Free',
-    price: '$0',
-    period: '/month',
-    description: '1 chatbot, 100 messages/month',
-    features: ['1 chatbot', '100 messages/month', '1 document upload', 'Community support'],
-    cta: 'Get started free',
+    name: "Free",
+    price: "$0",
+    period: "/month",
+    description: "1 chatbot, 100 messages/month",
+    features: [
+      "1 chatbot",
+      "100 messages/month",
+      "1 document upload",
+      "Community support",
+    ],
+    cta: "Get started free",
     highlighted: false,
   },
   {
-    name: 'Pro',
-    price: '$49',
-    period: '/month',
-    description: '5 chatbots, 5,000 messages/month',
-    features: ['5 chatbots', '5,000 messages/month', '50 documents', 'Custom branding', 'Priority support'],
-    cta: 'Start Pro trial',
+    name: "Pro",
+    price: "$49",
+    period: "/month",
+    description: "5 chatbots, 5,000 messages/month",
+    features: [
+      "5 chatbots",
+      "5,000 messages/month",
+      "50 documents",
+      "Custom branding",
+      "Priority support",
+    ],
+    cta: "Start Pro trial",
     highlighted: true,
   },
   {
-    name: 'Business',
-    price: '$149',
-    period: '/month',
-    description: 'Unlimited chatbots, white-label',
-    features: ['Unlimited chatbots', 'Unlimited messages', 'Unlimited documents', 'White-label', 'API access', 'Dedicated support'],
-    cta: 'Contact sales',
+    name: "Business",
+    price: "$149",
+    period: "/month",
+    description: "Unlimited chatbots, white-label",
+    features: [
+      "Unlimited chatbots",
+      "Unlimited messages",
+      "Unlimited documents",
+      "White-label",
+      "API access",
+      "Dedicated support",
+    ],
+    cta: "Contact sales",
     highlighted: false,
   },
-]
+];
 
 export default function LandingPage() {
   return (
@@ -64,8 +85,8 @@ export default function LandingPage() {
           <span className="text-primary">in 60 seconds</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Upload your docs, customize the look, paste one script tag.
-          Your customers get instant answers powered by RAG and Claude.
+          Upload your docs, customize the look, paste one script tag. Your
+          customers get instant answers powered by RAG and Claude.
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
           <Link
@@ -90,10 +111,17 @@ export default function LandingPage() {
         </h2>
         <div className="grid gap-6 md:grid-cols-3">
           {features.map((feature) => (
-            <div key={feature.title} className="rounded-lg border border-border bg-card p-6">
+            <div
+              key={feature.title}
+              className="rounded-lg border border-border bg-card p-6"
+            >
               <feature.icon className="h-8 w-8 text-primary mb-3" />
-              <h3 className="font-semibold text-foreground mb-1">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="font-semibold text-foreground mb-1">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
@@ -110,19 +138,28 @@ export default function LandingPage() {
               key={plan.name}
               className={`rounded-lg border p-6 ${
                 plan.highlighted
-                  ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                  : 'border-border bg-card'
+                  ? "border-primary bg-primary/5 ring-1 ring-primary"
+                  : "border-border bg-card"
               }`}
             >
               <h3 className="font-semibold text-foreground">{plan.name}</h3>
               <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-foreground">{plan.price}</span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
+                <span className="text-3xl font-bold text-foreground">
+                  {plan.price}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {plan.period}
+                </span>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {plan.description}
+              </p>
               <ul className="mt-4 space-y-2">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-foreground">
+                  <li
+                    key={f}
+                    className="flex items-center gap-2 text-sm text-foreground"
+                  >
                     <span className="text-primary">&#10003;</span>
                     {f}
                   </li>
@@ -132,8 +169,8 @@ export default function LandingPage() {
                 href="/dashboard"
                 className={`mt-6 block rounded-lg px-4 py-2 text-center text-sm font-medium transition-opacity hover:opacity-90 ${
                   plan.highlighted
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground'
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground"
                 }`}
               >
                 {plan.cta}
@@ -143,5 +180,5 @@ export default function LandingPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

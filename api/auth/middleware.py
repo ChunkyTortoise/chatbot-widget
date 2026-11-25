@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+
 from api.config import settings
 
 _bearer = HTTPBearer(auto_error=False)
@@ -44,7 +46,9 @@ def _decode_token(token: str) -> CurrentUser:
     return CurrentUser(sub=sub, email=email, role=role)
 
 
-DEMO_USER = CurrentUser(sub="demo-user-id", email="demo@example.com", role="authenticated")
+DEMO_USER = CurrentUser(
+    sub="demo-user-id", email="demo@example.com", role="authenticated"
+)
 
 
 async def get_current_user(

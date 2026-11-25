@@ -1,12 +1,14 @@
 """WebSocket chat endpoint tests."""
 
 import uuid
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from starlette.testclient import TestClient
+
+import pytest
 from fastapi import FastAPI
-from api.routes.chat import router
+from starlette.testclient import TestClient
+
 from api.dependencies import get_db, get_redis
+from api.routes.chat import router
 
 
 @pytest.fixture

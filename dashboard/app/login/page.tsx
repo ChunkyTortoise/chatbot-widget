@@ -1,56 +1,55 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { apiFetch } from '@/lib/api'
-import type { AuthResponse } from '@/lib/types'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
+import type { AuthResponse } from "@/lib/types";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [demoLoading, setDemoLoading] = useState(false)
-  const [isSignup, setIsSignup] = useState(false)
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [isSignup, setIsSignup] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const endpoint = isSignup ? '/auth/signup' : '/auth/login'
+      const endpoint = isSignup ? "/auth/signup" : "/auth/login";
       const data = await apiFetch<AuthResponse>(endpoint, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ email, password }),
-      })
-      localStorage.setItem('token', data.access_token)
-      localStorage.setItem('user_email', data.email)
-      router.push('/dashboard')
+      });
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user_email", data.email);
+      router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed')
+      setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function handleDemoLogin() {
-    setError('')
-    setDemoLoading(true)
+    setError("");
+    setDemoLoading(true);
 
     try {
-      const data = await apiFetch<AuthResponse>('/auth/demo-login', {
-        method: 'POST',
-      })
-      localStorage.setItem('token', data.access_token)
-      localStorage.setItem('user_email', data.email)
-      router.push('/dashboard')
+      const data = await apiFetch<AuthResponse>("/auth/demo-login", {
+        method: "POST",
+      });
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user_email", data.email);
+      router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Demo login failed')
+      setError(err instanceof Error ? err.message : "Demo login failed");
     } finally {
-      setDemoLoading(false)
+      setDemoLoading(false);
     }
   }
 
@@ -58,10 +57,12 @@ export default function LoginPage() {
     <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md items-center px-4">
       <div className="w-full rounded-lg border border-border bg-card p-8">
         <h1 className="text-2xl font-bold text-foreground mb-1">
-          {isSignup ? 'Create account' : 'Welcome back'}
+          {isSignup ? "Create account" : "Welcome back"}
         </h1>
         <p className="text-sm text-muted-foreground mb-6">
-          {isSignup ? 'Sign up to start building chatbots' : 'Log in to your dashboard'}
+          {isSignup
+            ? "Sign up to start building chatbots"
+            : "Log in to your dashboard"}
         </p>
 
         {error && (
@@ -72,7 +73,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Email
             </label>
             <input
@@ -86,7 +90,10 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Password
             </label>
             <input
@@ -105,30 +112,34 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {loading ? 'Please wait...' : isSignup ? 'Create account' : 'Log in'}
+            {loading
+              ? "Please wait..."
+              : isSignup
+                ? "Create account"
+                : "Log in"}
           </button>
         </form>
 
-        {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+        {process.env.NEXT_PUBLIC_DEMO_MODE === "true" && (
           <button
             onClick={handleDemoLogin}
             disabled={demoLoading}
             className="w-full mt-3 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors disabled:opacity-50"
           >
-            {demoLoading ? 'Please wait...' : 'Try Demo (no account needed)'}
+            {demoLoading ? "Please wait..." : "Try Demo (no account needed)"}
           </button>
         )}
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
+          {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
           <button
             onClick={() => setIsSignup(!isSignup)}
             className="text-primary hover:underline font-medium"
           >
-            {isSignup ? 'Log in' : 'Sign up'}
+            {isSignup ? "Log in" : "Sign up"}
           </button>
         </p>
       </div>
     </div>
-  )
+  );
 }

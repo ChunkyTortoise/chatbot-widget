@@ -1,14 +1,17 @@
 import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, Request, Header
-from pydantic import BaseModel
-from api.auth.middleware import get_current_user, CurrentUser
-from api.dependencies import get_redis, get_db
-from .stripe_client import get_stripe, PLANS
-from api.config import settings
+
 import redis.asyncio as aioredis
 import stripe as _stripe
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from api.auth.middleware import CurrentUser, get_current_user
+from api.config import settings
+from api.dependencies import get_db, get_redis
+
+from .stripe_client import PLANS, get_stripe
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +35,7 @@ async def billing_status(
     user: CurrentUser = Depends(get_current_user),
     redis_client: aioredis.Redis = Depends(get_redis),
 ):
-    from .quota import get_user_plan, get_message_count, get_plan_limit
+    from .quota import get_message_count, get_plan_limit, get_user_plan
 
     plan_tier = await get_user_plan(redis_client, user.email)
     messages_used = await get_message_count(redis_client, user.email)
@@ -130,6 +133,7 @@ async def _handle_subscription_upsert(
         if db and customer_email:
             try:
                 from sqlalchemy import select
+
                 from api.models.subscription import Subscription
 
                 result = await db.execute(
@@ -144,6 +148,7 @@ async def _handle_subscription_upsert(
                     existing.stripe_customer_id = customer_id
                 else:
                     import uuid
+
                     new_sub = Subscription(
                         id=uuid.uuid4(),
                         user_email=customer_email,
@@ -156,7 +161,11 @@ async def _handle_subscription_upsert(
                     db.add(new_sub)
                 await db.commit()
             except Exception:
-                logger.warning("Dual-write to Postgres failed for subscription %s", subscription["id"], exc_info=True)
+                logger.warning(
+                    "Dual-write to Postgres failed for subscription %s",
+                    subscription["id"],
+                    exc_info=True,
+                )
 
 
 async def _handle_subscription_deleted(

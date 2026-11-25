@@ -652,10 +652,10 @@
 
     // 2. Inject widget with demo chatbot ID
     injectWidget();
-    
+
     // 3. Setup copy button
     setupCopyButton();
-    
+
     // 4. Update snippet with actual API URL
     updateSnippetUrl();
   });
@@ -698,7 +698,7 @@
   async function copySnippet() {
     const btn = document.getElementById('copy-btn');
     const apiUrl = window.location.origin;
-    
+
     const snippet = `<script
   src="${apiUrl}/widget/chatbot.min.js"
   data-chatbot-id="YOUR_CHATBOT_ID"
@@ -706,7 +706,7 @@
   data-primary-color="#3B82F6"
   data-title="Chat with us"
 ><\/script>`;
-    
+
     try {
       await navigator.clipboard.writeText(snippet);
       btn.textContent = '✓ Copied!';
